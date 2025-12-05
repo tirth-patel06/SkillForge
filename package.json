@@ -16,5 +16,14 @@
     "url": "https://github.com/anushkagupta-06/hustle-haveli/issues"
   },
   "homepage": "https://github.com/anushkagupta-06/hustle-haveli#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.0.0",
+    "pdfkit": "^0.17.2"
+  }
 }
