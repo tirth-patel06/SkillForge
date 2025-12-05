@@ -18,6 +18,7 @@
   "homepage": "https://github.com/anushkagupta-06/hustle-haveli#readme",
   "description": "",
   "dependencies": {
+    "express": "^5.2.1",
     "mongoose": "^9.0.0"
   }
 }
