@@ -1,10 +1,15 @@
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
-export type ReferralStatus = "DRAFT" | "SUBMITTED" | "APPROVED" | "ISSUED";
+export type ReferralStatus =
+  | "PENDING"
+  | "ACCEPTED"
+  | "REJECTED"
+  | "APPROVED"
+  | "REMOVED";
 
 export interface IReferral extends Document {
-  studentId: Types.ObjectId; // ref: "User" (role STUDENT)
-  mentorId: Types.ObjectId; // ref: "User" (role MENTOR)
+  studentId: Types.ObjectId;  // ref: User (STUDENT)
+  mentorId: Types.ObjectId;   // ref: User (MENTOR)
   recommendation: string;
   evidenceLinks: string[];
   status: ReferralStatus;
@@ -19,17 +24,21 @@ const ReferralSchema = new Schema<IReferral>(
       ref: "User",
       required: true,
     },
+
     mentorId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+
     recommendation: { type: String, required: true },
+
     evidenceLinks: { type: [String], default: [] },
+
     status: {
       type: String,
-      enum: ["DRAFT", "SUBMITTED", "APPROVED", "ISSUED"],
-      default: "DRAFT",
+      enum: ["PENDING", "ACCEPTED", "REJECTED", "APPROVED", "REMOVED"],
+      default: "PENDING", // every new referral -> pending for mentor to review
     },
   },
   {
@@ -40,6 +49,7 @@ const ReferralSchema = new Schema<IReferral>(
   }
 );
 
+// indexing for fast lookup
 ReferralSchema.index({ studentId: 1 });
 ReferralSchema.index({ mentorId: 1 });
 ReferralSchema.index({ status: 1 });
