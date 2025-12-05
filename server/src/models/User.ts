@@ -14,3 +14,19 @@ export interface IUser extends Document {
 }
 
 
+const UserSchema = new Schema<IUser>({// interfaced instance of user being created
+  email: { type: String,
+     required: true,
+      unique: true },
+  name: String,
+  passwordHash: String,
+  role: { type: String,
+     enum: ["STUDENT","MENTOR","ADMIN"],
+      default: "STUDENT" },
+  verified: { type: Boolean,
+     default: false },
+  banned: { type: Boolean,
+     default: false },
+  createdAt: { type: Date,
+     default: Date.now }
+});
