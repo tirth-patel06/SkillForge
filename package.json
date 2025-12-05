@@ -16,5 +16,8 @@
     "url": "https://github.com/anushkagupta-06/hustle-haveli/issues"
   },
   "homepage": "https://github.com/anushkagupta-06/hustle-haveli#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "mongoose": "^9.0.0"
+  }
 }
