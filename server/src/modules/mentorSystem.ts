@@ -1,136 +1,35 @@
-// src/models/mentorSystem.ts
-import {
+import mongoose, {
   Schema,
-  model,
   Document,
-  Types,
   Model,
-} from 'mongoose';
-
-/*Mentor*/
-
-export interface IMentor extends Document {
-  userId: Types.ObjectId;
-  name: string;
-  email: string;
-  avatarUrl?: string;
-  createdAt: Date;
-}
-
-const mentorSchema = new Schema<IMentor>(
-  {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    name: { type: String, required: true },
-    email: { type: String, unique: true, required: true },
-    avatarUrl: { type: String },
-  },
-  {
-    timestamps: { createdAt: 'createdAt', updatedAt: false },
-  }
-);
-
-mentorSchema.index({ email: 1 }, { unique: true });
-
-/*Student*/
-
-export interface IStudent extends Document {
-  name: string;
-  email: string;
-  teamId?: Types.ObjectId | null;
-  avatarUrl?: string;
-  createdAt: Date;
-}
-
-const studentSchema = new Schema<IStudent>(
-  {
-    name: { type: String, required: true },
-    email: { type: String, unique: true, required: true },
-    teamId: { type: Schema.Types.ObjectId, ref: 'Team', default: null },
-    avatarUrl: { type: String },
-  },
-  {
-    timestamps: { createdAt: 'createdAt', updatedAt: false },
-  }
-);
-
-studentSchema.index({ email: 1 }, { unique: true });
-studentSchema.index({ teamId: 1 });
+  Types,
+} from "mongoose";
 
 /*Team*/
 
 export interface ITeam extends Document {
   name: string;
-  mentorId: Types.ObjectId;
+  // users (students) in this team
+  members: Types.ObjectId[]; // "User"
+  leader: Types.ObjectId; // "User"
+  mentor: Types.ObjectId; // "User" with role "MENTOR"
   createdAt: Date;
 }
 
-const teamSchema = new Schema<ITeam>(
-  {
-    name: { type: String, required: true },
-    mentorId: { type: Schema.Types.ObjectId, ref: 'Mentor', required: true },
-  },
-  {
-    timestamps: { createdAt: 'createdAt', updatedAt: false },
-  }
-);
+const TeamSchema = new Schema<ITeam>({
+  name: { type: String, required: true },
+  members: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  leader: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  mentor: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  createdAt: { type: Date, default: Date.now },
+});
 
-teamSchema.index({ mentorId: 1 });
-
-/*Task*/
-
-export type TaskStatus = 'active' | 'archived' | 'open' | 'closed';
-
-export interface IRubricItem {
-  name: string;
-  description?: string;
-  weightage: number;
-  orderIndex: number;
-}
-
-export interface ITask extends Document {
-  title: string;
-  description: string;
-  expectedSkills: string[];
-  mentorId: Types.ObjectId;
-  rubric: Record<string, unknown> | IRubricItem[]; // flexible, you decide
-  deadline?: Date | null;
-  status: TaskStatus;
-  createdAt: Date;
-}
-
-const taskSchema = new Schema<ITask>(
-  {
-    title: { type: String, required: true },
-    description: { type: String, default: '' },
-    expectedSkills: { type: [String], default: [] },
-    mentorId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Mentor',
-      required: true,
-    },
-    rubric: {
-      type: Schema.Types.Mixed,
-      default: {},
-    },
-    deadline: { type: Date },
-    status: {
-      type: String,
-      enum: ['active', 'archived', 'open', 'closed'],
-      default: 'active',
-    },
-  },
-  {
-    timestamps: { createdAt: 'createdAt', updatedAt: false },
-  }
-);
-
-taskSchema.index({ mentorId: 1 });
-taskSchema.index({ status: 1 });
+TeamSchema.index({ mentor: 1 });
 
 /*Rubric Criteria*/
 
 export interface IRubricCriteria extends Document {
-  taskId: Types.ObjectId;
+  taskId: Types.ObjectId; // ref: "Task"
   name: string;
   description: string;
   weightage: number;
@@ -138,50 +37,46 @@ export interface IRubricCriteria extends Document {
   createdAt: Date;
 }
 
-const rubricCriteriaSchema = new Schema<IRubricCriteria>(
-  {
-    taskId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Task',
-      required: true,
-    },
-    name: { type: String, required: true },
-    description: { type: String, default: '' },
-    weightage: { type: Number, default: 0 },
-    orderIndex: { type: Number, default: 0 },
+const RubricCriteriaSchema = new Schema<IRubricCriteria>({
+  taskId: {
+    type: Schema.Types.ObjectId,
+    ref: "Task",
+    required: true,
   },
-  {
-    timestamps: { createdAt: 'createdAt', updatedAt: false },
-  }
-);
+  name: { type: String, required: true },
+  description: { type: String, default: "" },
+  weightage: { type: Number, default: 0 },
+  orderIndex: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now },
+});
 
-rubricCriteriaSchema.index({ taskId: 1 });
+RubricCriteriaSchema.index({ taskId: 1 });
 
 /*Submission*/
 
-export type SubmissionStatus = 'pending' | 'approved' | 'changes_requested';
+export type SubmissionStatus = "PENDING" | "APPROVED" | "CHANGES_REQUESTED";
 
 export interface IReview {
-  scores: Map<string, number>;
+  scores: Map<string, number>; // criteriaId -> score
   feedback: string;
 }
 
-const reviewSubSchema = new Schema<IReview>(
+const ReviewSchema = new Schema<IReview>(
   {
     scores: {
       type: Map,
       of: Number,
       default: {},
     },
-    feedback: { type: String, default: '' },
+    feedback: { type: String, default: "" },
   },
   { _id: false }
 );
 
 export interface ISubmission extends Document {
-  taskId: Types.ObjectId;
-  studentId?: Types.ObjectId;
-  teamId?: Types.ObjectId;
+  taskId: Types.ObjectId; // ref: "Task"
+  studentId?: Types.ObjectId; // ref: "User"
+  teamId?: Types.ObjectId; // ref: "Team"
   version: number;
   githubUrl?: string;
   fileUrls: string[];
@@ -189,152 +84,93 @@ export interface ISubmission extends Document {
   notes?: string;
   status: SubmissionStatus;
   submittedAt: Date;
-  reviewedBy?: Types.ObjectId;
+  reviewedBy?: Types.ObjectId; // ref: "User" (mentor)
   reviewedAt?: Date;
   review?: IReview;
 }
 
-const submissionSchema = new Schema<ISubmission>(
-  {
-    taskId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Task',
-      required: true,
-    },
-    studentId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Student',
-    },
-    teamId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Team',
-    },
-    version: { type: Number, default: 1 },
-    githubUrl: { type: String },
-    fileUrls: { type: [String], default: [] },
-    files: { type: [String], default: [] },
-    notes: { type: String },
-    status: {
-      type: String,
-      enum: ['pending', 'approved', 'changes_requested'],
-      default: 'pending',
-    },
-    submittedAt: { type: Date, default: Date.now },
-    reviewedBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'Mentor',
-    },
-    reviewedAt: { type: Date },
-    review: {
-      type: reviewSubSchema,
-      default: undefined,
-    },
+const SubmissionSchema = new Schema<ISubmission>({
+  taskId: {
+    type: Schema.Types.ObjectId,
+    ref: "Task",
+    required: true,
   },
-  {
-    timestamps: false,
-  }
-);
+  studentId: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
+  teamId: {
+    type: Schema.Types.ObjectId,
+    ref: "Team",
+  },
+  version: { type: Number, default: 1 },
+  githubUrl: { type: String },
+  fileUrls: { type: [String], default: [] },
+  files: { type: [String], default: [] },
+  notes: { type: String },
+  status: {
+    type: String,
+    enum: ["PENDING", "APPROVED", "CHANGES_REQUESTED"],
+    default: "PENDING",
+  },
+  submittedAt: { type: Date, default: Date.now },
+  reviewedBy: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
+  reviewedAt: { type: Date },
+  review: {
+    type: ReviewSchema,
+    default: undefined,
+  },
+});
 
-submissionSchema.index({ taskId: 1 });
-submissionSchema.index({ studentId: 1 });
-submissionSchema.index({ teamId: 1 });
-submissionSchema.index({ status: 1 });
+SubmissionSchema.index({ taskId: 1 });
+SubmissionSchema.index({ studentId: 1 });
+SubmissionSchema.index({ teamId: 1 });
+SubmissionSchema.index({ status: 1 });
 
-/*Submission Score*/
+/*Submission Score (per-criteria breakdown)*/
 
 export interface ISubmissionScore extends Document {
-  submissionId: Types.ObjectId;
-  criteriaId: Types.ObjectId;
+  submissionId: Types.ObjectId; // "Submission"
+  criteriaId: Types.ObjectId; // "RubricCriteria"
   score: number;
   feedback?: string;
   createdAt: Date;
 }
 
-const submissionScoreSchema = new Schema<ISubmissionScore>(
-  {
-    submissionId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Submission',
-      required: true,
-    },
-    criteriaId: {
-      type: Schema.Types.ObjectId,
-      ref: 'RubricCriteria',
-      required: true,
-    },
-    score: { type: Number, default: 0 },
-    feedback: { type: String },
+const SubmissionScoreSchema = new Schema<ISubmissionScore>({
+  submissionId: {
+    type: Schema.Types.ObjectId,
+    ref: "Submission",
+    required: true,
   },
-  {
-    timestamps: { createdAt: 'createdAt', updatedAt: false },
-  }
-);
-
-submissionScoreSchema.index({ submissionId: 1 });
-submissionScoreSchema.index({ criteriaId: 1 });
-
-/*Referral*/
-
-export type ReferralStatus = 'draft' | 'submitted' | 'approved' | 'issued';
-
-export interface IReferral extends Document {
-  studentId: Types.ObjectId;
-  mentorId: Types.ObjectId;
-  recommendation: string;
-  evidenceLinks: string[];
-  status: ReferralStatus;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const referralSchema = new Schema<IReferral>(
-  {
-    studentId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Student',
-      required: true,
-    },
-    mentorId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Mentor',
-      required: true,
-    },
-    recommendation: { type: String, required: true },
-    evidenceLinks: { type: [String], default: [] },
-    status: {
-      type: String,
-      enum: ['draft', 'submitted', 'approved', 'issued'],
-      default: 'draft',
-    },
+  criteriaId: {
+    type: Schema.Types.ObjectId,
+    ref: "RubricCriteria",
+    required: true,
   },
-  {
-    timestamps: {
-      createdAt: 'createdAt',
-      updatedAt: 'updatedAt',
-    },
-  }
-);
+  score: { type: Number, default: 0 },
+  feedback: { type: String },
+  createdAt: { type: Date, default: Date.now },
+});
 
-referralSchema.index({ studentId: 1 });
-referralSchema.index({ mentorId: 1 });
-referralSchema.index({ status: 1 });
+SubmissionScoreSchema.index({ submissionId: 1 });
+SubmissionScoreSchema.index({ criteriaId: 1 });
 
 /*Model exports*/
 
-export const Mentor: Model<IMentor> = model<IMentor>('Mentor', mentorSchema);
-export const Student: Model<IStudent> = model<IStudent>('Student', studentSchema);
-export const Team: Model<ITeam> = model<ITeam>('Team', teamSchema);
-export const Task: Model<ITask> = model<ITask>('Task', taskSchema);
-export const RubricCriteria: Model<IRubricCriteria> = model<IRubricCriteria>(
-  'RubricCriteria',
-  rubricCriteriaSchema
+export const Team: Model<ITeam> = mongoose.model<ITeam>("Team", TeamSchema);
+export const RubricCriteria: Model<IRubricCriteria> = mongoose.model<IRubricCriteria>(
+  "RubricCriteria",
+  RubricCriteriaSchema
 );
-export const Submission: Model<ISubmission> = model<ISubmission>(
-  'Submission',
-  submissionSchema
+export const Submission: Model<ISubmission> = mongoose.model<ISubmission>(
+  "Submission",
+  SubmissionSchema
 );
-export const SubmissionScore: Model<ISubmissionScore> = model<ISubmissionScore>(
-  'SubmissionScore',
-  submissionScoreSchema
+export const SubmissionScore: Model<ISubmissionScore> = mongoose.model<ISubmissionScore>(
+  "SubmissionScore",
+  SubmissionScoreSchema
 );
-export const Referral: Model<IReferral> = model<IReferral>('Referral', referralSchema);
