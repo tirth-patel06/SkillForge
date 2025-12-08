@@ -17,4 +17,4 @@ const startServer = async ()=> {
     await connectedDb();
 }
 startServer();
-app.listen(7000, ()=>console.log(`server on 7000`));
+app.listen(8000, ()=>console.log(`server on 8000`));
