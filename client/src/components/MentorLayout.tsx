@@ -1,6 +1,8 @@
 import { LayoutDashboard, FileText, ClipboardCheck, Users, LogOut, ListChecks } from "lucide-react";
 import type React from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 
 type PageId = "dashboard" | "create-task" | "my-tasks" | "reviews" | "referrals";
 
@@ -9,6 +11,7 @@ type User = {
   name?: string;
   email: string;
   role: "MENTOR" | "STUDENT" | "ADMIN";
+  profilePhotoUrl?: string;
 };
 
 type MentorLayoutProps = {
@@ -27,6 +30,30 @@ export function MentorLayout({ children, currentPage, onNavigate, user, onLogout
     { id: "reviews" as const, icon: ClipboardCheck, label: "Reviews" },
     { id: "referrals" as const, icon: Users, label: "Referrals" },
   ];
+
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch profile photo on mount
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const fetchProfilePhoto = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get("/mentors/me/profile");
+        if (res.data.profile?.profilePhotoUrl) {
+          setProfilePhoto(res.data.profile.profilePhotoUrl);
+        }
+      } catch (error) {
+        console.error("Error fetching profile photo:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfilePhoto();
+  }, [user?.id]);
 
   // Get initials from name or email
   const getInitials = () => {
@@ -75,8 +102,16 @@ export function MentorLayout({ children, currentPage, onNavigate, user, onLogout
           {/* Profile Section */}
           <Link href="/mentor/profile">
             <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors cursor-pointer">
-              <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center">
-                <span className="text-white font-semibold text-sm">{getInitials()}</span>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                {profilePhoto && !loading ? (
+                  <img
+                    src={profilePhoto}
+                    alt={user?.name || "Profile"}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-white font-semibold text-sm">{getInitials()}</span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{user?.name || "User"}</p>

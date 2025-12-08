@@ -180,12 +180,21 @@ function MentorProfilePageInner() {
       const res = await api.post("/mentors/me/upload-profile-image", formData);
 
       if (res.data.success) {
-        setProfile({
+        const updatedProfile = {
           ...profile,
           profilePhotoUrl: res.data.imageUrl,
-        });
+        };
+        setProfile(updatedProfile);
         setPhotoPreview(res.data.imageUrl);
-        setSuccess("Profile photo updated successfully!");
+        
+        // Save the updated profile to database immediately
+        try {
+          await api.put("/mentors/me/profile", updatedProfile);
+          setSuccess("Profile photo updated successfully!");
+        } catch (err) {
+          console.error("Error saving profile:", err);
+          setError("Photo uploaded but failed to save profile");
+        }
       }
     } catch (err) {
       console.error("Photo upload error:", err);
