@@ -2,7 +2,7 @@
 import bcrypt from "bcryptjs";
 import { User } from "../models/User";
 import { Task } from "../models/Task";
-
+import { Referral } from "../models/Referral";
 export async function seedDemo() {
 
  const mentor1 = await User.findOneAndUpdate(
@@ -22,7 +22,27 @@ export async function seedDemo() {
       status: "PENDING"
     });
   }
+ const student = await User.findOneAndUpdate(
+    { email: "student@college.edu" },
+    { name: "student One", role: "STUDENT", verified: true },
+    { upsert: true, new: true }
+  );
 
+    // referrals data
+    const referralsData = Array.from({ length: 5 }).map((_, i) => ({
+      studentId: student._id,
+      mentorId: mentor1._id,
+      recommendation: `This student performed excellently in project #${i + 1}.`,
+      evidenceLinks: [
+        `http://evidence.com/project_${i + 1}`,
+        `http://github.com/student/project_${i + 1}`,
+      ],
+      status: "PENDING",
+      signedToken: undefined, // explicitly empty
+      pdfUrl: undefined, // explicitly empty
+    }));
+     await Referral.insertMany(referralsData);
+  console.log("Seeded referrals also")
   console.log("Seed completed");
 }
 
