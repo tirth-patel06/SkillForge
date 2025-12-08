@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, ClipboardCheck, Users, LogOut, ListChecks } from "lucide-react";
+import { LayoutDashboard, FileText, ClipboardCheck, Users, LogOut, ListChecks, AlertTriangle, CheckCircle2 } from "lucide-react";
 import type React from "react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -98,11 +98,35 @@ export function MentorLayout({ children, currentPage, onNavigate, user, onLogout
           })}
         </nav>
 
-        <div className="p-4 border-t border-zinc-800 space-y-3">
+        {/* Attention Required Section */}
+        <div className="p-4 border-t border-zinc-800">
+          <Link href="/mentor/attention-required">
+            <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-red-900/20 border border-red-800/50 hover:bg-red-900/30 transition-colors cursor-pointer">
+              <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-red-300">Critical Issues</p>
+                <p className="text-xs text-red-400/70">View attention required</p>
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        {/* Resolution History Section */}
+        <div className="p-4 border-t border-zinc-800">
+          <Link href="/mentor/resolved-history">
+            <div className="flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-zinc-900 transition-colors cursor-pointer">
+              <CheckCircle2 className="w-5 h-5 text-zinc-400 shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-zinc-300">Resolution History</p>
+                <p className="text-xs text-zinc-500">View resolved issues</p>
+              </div>
+            </div>
+          </Link>
+        </div>        <div className="p-4 border-t border-zinc-800 space-y-3">
           {/* Profile Section */}
           <Link href="/mentor/profile">
             <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors cursor-pointer">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
+              <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center shrink-0 overflow-hidden">
                 {profilePhoto && !loading ? (
                   <img
                     src={profilePhoto}

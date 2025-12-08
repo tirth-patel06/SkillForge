@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth";
 import { requireMentor } from "../middleware/requireMentor";
-import { createTask, getMyTasks, removeTask } from "../controllers/taskController";
+import { createTask, getMyTasks, removeTask, getTaskDetail, updateTask, approveTask, resolveTask, getResolvedTasks } from "../controllers/taskController";
 import { getTaskRubric } from "../controllers/submissionController";
 
 const router = Router();
@@ -12,11 +12,26 @@ router.use(authMiddleware);
 // Get mentor's tasks
 router.get("/", requireMentor, getMyTasks);
 
+// Get mentor's resolved tasks (critical issues resolved)
+router.get("/resolved/history", requireMentor, getResolvedTasks);
+
 // Create a new task (mentor only)
 router.post("/", requireMentor, createTask);
 
+// Get detail for a specific task (all authenticated users)
+router.get("/:taskId", getTaskDetail);
+
+// Update a task (mentor only, status not editable)
+router.put("/:taskId", requireMentor, updateTask);
+
 // Get rubric criteria for a task
 router.get("/rubric/:taskId", getTaskRubric);
+
+// Approve a task (mentor marks ACTIVE task as APPROVED/completed)
+router.post("/:id/approve", requireMentor, approveTask);
+
+// Resolve a critical issue with notes
+router.post("/:id/resolve", requireMentor, resolveTask);
 
 // Remove a task (soft delete)
 router.delete("/:id", requireMentor, removeTask);

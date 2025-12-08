@@ -11,6 +11,7 @@ import mentorRoutes from "./routes/mentorRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import submissionRoutes from "./routes/submissionRoutes";
 import referralRoutes from "./routes/referralRoutes";
+import commentRoutes from "./routes/commentRoutes";
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use("/api/students", studentRoutes);
 app.use("/api/tasks", taskRoutes);              
 app.use("/api/submissions", submissionRoutes); 
 app.use("/api/referrals", referralRoutes);     
+app.use("/api", commentRoutes);
 
 // 404 Handler
 app.use((_req, res) => {

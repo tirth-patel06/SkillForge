@@ -10,11 +10,16 @@ export interface ITask extends Document {
   difficulty: "EASY" | "MEDIUM" | "HARD";
   techStack: string[];
   expectedTeamSize?: number;
+  estimatedHours?: number;
   deadline?: Date;
   createdBy: mongoose.Types.ObjectId; // mentor (User) id
   status: TaskStatus;
   modNotes?: string; // notes by admin/mentor
+  resolvedAt?: Date; // when critical issue was resolved
+  resolutionNotes?: string; // how the issue was resolved
+  criticalReason?: string; // why it became critical
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const TaskSchema = new Schema<ITask>({
@@ -27,6 +32,7 @@ const TaskSchema = new Schema<ITask>({
   },
   techStack: [String],
   expectedTeamSize: Number,
+  estimatedHours: Number,
   deadline: Date,
   createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   status: {
@@ -35,7 +41,11 @@ const TaskSchema = new Schema<ITask>({
     default: "PENDING",
   },
   modNotes: String,
-  createdAt: { type: Date, default: Date.now },
+  resolvedAt: Date,
+  resolutionNotes: String,
+  criticalReason: String,
+}, {
+  timestamps: true, // Automatically adds createdAt and updatedAt
 });
 
 export const Task: Model<ITask> = mongoose.model<ITask>("Task", TaskSchema);
