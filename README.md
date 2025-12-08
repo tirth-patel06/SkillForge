@@ -1,5 +1,11 @@
 🚀 Hustle Haveli – Project Structure
 
+Team Members :
+1. Anushka Gupta - 20244032
+2. Aditya Kanodia - 20244012
+3. Tirth Patel - 20244125
+4. Shreya Saxena - 20244153
+
 This repository contains the initial setup for the Hustle Haveli project, including both the frontend (client) and backend (server) environments.
 
 ## 📁 Folder Structure
