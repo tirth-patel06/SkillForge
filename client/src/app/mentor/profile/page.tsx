@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { MentorLayout } from "@/components/MentorLayout";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
@@ -58,7 +59,7 @@ const emptyProfile: MentorProfile = {
   visibility: "PUBLIC",
 };
 
-export default function MentorProfilePage() {
+function MentorProfilePageInner() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const [profile, setProfile] = useState<MentorProfile>(emptyProfile);
@@ -154,19 +155,43 @@ export default function MentorProfilePage() {
     });
   };
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    try {
+      setUploadingPhoto(true);
+      setError(null);
+
+      // Create preview while uploading
       const reader = new FileReader();
       reader.onloadend = () => {
-        const result = reader.result as string;
-        setPhotoPreview(result);
-        setProfile({
-          ...profile,
-          profilePhotoUrl: result,
-        });
+        setPhotoPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      // Upload to server which handles Cloudinary
+      const formData = new FormData();
+      formData.append("image", file);
+
+      // Don't set Content-Type header - let axios/browser handle it with proper boundary
+      const res = await api.post("/mentors/me/upload-profile-image", formData);
+
+      if (res.data.success) {
+        setProfile({
+          ...profile,
+          profilePhotoUrl: res.data.imageUrl,
+        });
+        setPhotoPreview(res.data.imageUrl);
+        setSuccess("Profile photo updated successfully!");
+      }
+    } catch (err) {
+      console.error("Photo upload error:", err);
+      setError("Failed to upload photo");
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
@@ -278,11 +303,12 @@ export default function MentorProfilePage() {
                       type="file"
                       accept="image/*"
                       onChange={handlePhotoChange}
+                      disabled={uploadingPhoto}
                       className="hidden"
                     />
-                    <span className="inline-flex items-center space-x-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-zinc-300 transition-colors">
+                    <span className="inline-flex items-center space-x-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-zinc-300 transition-colors disabled:opacity-50">
                       <Upload className="w-4 h-4" />
-                      <span>Change Photo</span>
+                      <span>{uploadingPhoto ? "Uploading..." : "Change Photo"}</span>
                     </span>
                   </label>
                 )}
@@ -679,5 +705,13 @@ function StatCard({
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MentorProfilePage() {
+  return (
+    <ProtectedRoute allowedRoles={["MENTOR"]}>
+      <MentorProfilePageInner />
+    </ProtectedRoute>
   );
 }

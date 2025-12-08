@@ -1,12 +1,14 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth";
 import { requireMentor } from "../middleware/requireMentor";
+import { upload } from "../middleware/upload";
 import { getMentorDashboard } from "../controllers/mentorController";
 import {
   getMentorProfile,
   updateMentorProfile,
   getMentorStats,
 } from "../controllers/mentorProfileController";
+import { uploadMentorProfileImage } from "../controllers/uploadController";
 
 const router = Router();
 
@@ -22,5 +24,13 @@ router.put("/me/profile", requireMentor, updateMentorProfile);
 
 // Mentor stats
 router.get("/me/stats", requireMentor, getMentorStats);
+
+// Image upload route
+router.post(
+  "/me/upload-profile-image",
+  requireMentor,
+  upload.single("image"),
+  uploadMentorProfileImage
+);
 
 export default router;

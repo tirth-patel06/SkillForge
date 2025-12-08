@@ -1,19 +1,3 @@
-// import { Request } from "express";
-
-// export type UserRole = "STUDENT" | "MENTOR" | "ADMIN";
-
-// export interface JwtUserPayload {
-//   id: string;      // User _id
-//   role: UserRole;
-//   email: string;
-// }
-
-// export interface AuthRequest extends Request {
-//   user?: JwtUserPayload;
-// }
-
-// server/src/types/auth.ts
-// server/src/types/auth.ts
 import { Request } from "express";
 
 export interface JwtPayload {
@@ -27,6 +11,8 @@ export interface JwtPayload {
 // This is the type you're trying to import
 export interface AuthRequest extends Request {
   user?: JwtPayload;
+  file?: Express.Multer.File;
+  files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] };
 }
 
 // Also augment Express' built-in Request type so you can use plain Request too
