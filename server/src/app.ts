@@ -13,7 +13,7 @@ import studentRoutes from "./routes/studentRoutes";
 // import referralRoutes from "./routes/referralRoutes";
 // import studentRoutes from "./routes/studentRoutes";
 // import authRoutes from "./routes/authRoutes";
-
+import teamRoutes from "./routes/teamRoutes";
 const app = express();
 
 const allowedOrigins = ["http://localhost:3000"];
@@ -41,9 +41,11 @@ app.get("/api/health", (_req, res) => {
 // app.use("/api/tasks", taskRoutes);              
 // app.use("/api/submissions", submissionRoutes); 
 // app.use("/api/referrals", referralRoutes);     
-app.use("/api/students", studentRoutes);        
+      
 app.use("/api/auth", authRoutes);
 
+app.use("/api/students", studentRoutes);
+app.use("/api/teams", teamRoutes);
 // 404 Handler
 app.use((_req, res) => {
   res.status(404).json({ message: "Route not found" });

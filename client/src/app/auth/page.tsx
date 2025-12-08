@@ -117,7 +117,7 @@ export default function AuthPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-900 to-sky-800 p-4">
+    <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-900 via-indigo-900 to-sky-800 p-4">
       <div className="w-full max-w-md bg-white/95 rounded-2xl shadow-2xl p-8 animate-fadeIn">
         {/* Header */}
         <div className="mb-6 text-center">
