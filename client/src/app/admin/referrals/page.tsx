@@ -45,7 +45,7 @@ export default function AdminReferralsPage() {
         { withCredentials: true }
       );
       const data = res.data;
-      const pdfUrl = data.ref?.pdfUrl;
+      const pdfUrl = null
       if (pdfUrl) {
         const open = confirm("Referral approved. Open generated PDF?");
         if (open) window.open(pdfUrl, "_blank");
@@ -138,11 +138,11 @@ export default function AdminReferralsPage() {
                     </div>
                     <div className="mt-2">
                       <strong className="text-slate-300">Reason:</strong>{" "}
-                      <span className="text-slate-400">{r.reason ?? "—"}</span>
+                      <span className="text-slate-400">{r.recommendation ?? "—"}</span>
                     </div>
-                    {r.evidence && r.evidence.length > 0 && (
+                    {r.evidenceLinks && r.evidenceLinks.length > 0 && (
                       <div className="mt-2 text-xs text-slate-400">
-                        Evidence: {r.evidence.join(", ")}
+                        Evidence: {r.evidenceLinks.join(", ")}
                       </div>
                     )}
                   </div>
