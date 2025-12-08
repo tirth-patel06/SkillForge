@@ -1,7 +1,8 @@
 // client/src/api/auth.ts
 import axios from "axios";
+import { SetStateAction } from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
@@ -11,6 +12,8 @@ const api = axios.create({
 export type Role = "STUDENT" | "MENTOR" | "ADMIN";
 
 export interface User {
+  [x: string]: any;
+  user: User | PromiseLike<User>;
   id: string;
   email: string;
   name?: string;
@@ -39,8 +42,9 @@ export async function loginApi(data: {
   return api.post("/auth/login", data);
 }
 
-export async function meApi() {
-  return api.get("/auth/me");
+export async function meApi(): Promise<User> {
+  const res = await api.get<User>("/auth/me");
+  return res.data.user;
 }
 
 export async function logoutApi() {
