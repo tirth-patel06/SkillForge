@@ -11,6 +11,7 @@ import studentRoutes from "./routes/studentRoutes";
  //import taskRoutes from "./routes/taskRoutes";
  ////import submissionRoutes from "./routes/submissionRoutes";
 //import referralRoutes from "./routes/referralRoutes";
+import adminTaskRoutes from './controllers/adminTaskApprove'
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.get("/api/health", (_req, res) => {
  //app.use("/api/referrals", referralRoutes);     
 app.use("/api/students", studentRoutes);        
 app.use("/api/auth", authRoutes);
+app.use('/api/admin/tasks',adminTaskRoutes)
 
 // 404 Handler
 app.use((_req, res) => {
