@@ -30,7 +30,7 @@ export default function AuthPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const githubUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/auth/github`;
+  const githubUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/auth/github`;
 
   const handleInput =
     (field: "name" | "email" | "password") =>
