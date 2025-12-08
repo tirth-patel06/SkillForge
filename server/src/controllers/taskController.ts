@@ -3,6 +3,58 @@ import type { AuthRequest } from "../types/auth";
 import { Task } from "../models/Task";
 import { RubricCriteria, Submission } from "../models/MentorSystem";
 
+// Helper function to calculate attention status for a task
+const calculateAttentionStatus = (task: any, submissions: any[]) => {
+  const daysPending = Math.floor(
+    (new Date().getTime() - new Date(task.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  // REJECTED status - Critical
+  if (task.status === "REJECTED") {
+    return { level: "critical", reason: "Task rejected by admin - needs revision" };
+  }
+
+  if (task.status === "ACTIVE") {
+    // Count unreviewed submissions
+    const unreviewed = submissions.filter((s) => s.status === "PENDING").length;
+    
+    // Critical: 5+ unreviewed submissions
+    if (unreviewed >= 5) {
+      return { level: "critical", reason: `${unreviewed} unreviewed submissions` };
+    }
+    
+    // High: 3-4 unreviewed submissions
+    if (unreviewed >= 3) {
+      return { level: "high", reason: `${unreviewed} submissions waiting for review` };
+    }
+    
+    // Medium: 1-2 unreviewed submissions
+    if (unreviewed >= 1) {
+      return { level: "medium", reason: `${unreviewed} unreviewed submission(s)` };
+    }
+  }
+
+  if (task.status === "PENDING") {
+    // Critical: Pending for 14+ days
+    if (daysPending >= 14) {
+      return { level: "critical", reason: "Pending approval for 14+ days" };
+    }
+    
+    // High: Pending for 7-13 days
+    if (daysPending >= 7) {
+      return { level: "high", reason: `Pending for ${daysPending} days` };
+    }
+    
+    // Medium: Pending for 3-6 days
+    if (daysPending >= 3) {
+      return { level: "medium", reason: `Pending for ${daysPending} days` };
+    }
+  }
+
+  // No attention needed
+  return null;
+};
+
 // GET /api/tasks - list tasks created by current mentor (optional status filter)
 export const getMyTasks = async (req: AuthRequest, res: Response) => {
   try {
@@ -22,17 +74,28 @@ export const getMyTasks = async (req: AuthRequest, res: Response) => {
       .select("-__v")
       .lean();
 
-    const formatted = tasks.map((t) => ({
-      id: t._id.toString(),
-      title: t.title,
-      description: t.description,
-      difficulty: t.difficulty,
-      techStack: t.techStack || [],
-      expectedTeamSize: t.expectedTeamSize,
-      deadline: t.deadline ? t.deadline.toISOString() : null,
-      status: t.status,
-      createdAt: t.createdAt ? t.createdAt.toISOString() : new Date().toISOString(),
-    }));
+    // Enrich with attention status and submission counts
+    const formatted = await Promise.all(
+      tasks.map(async (t) => {
+        const submissions = await Submission.find({ taskId: t._id }).lean();
+        const unreviewed = submissions.filter((s) => s.status === "PENDING").length;
+        const attention = calculateAttentionStatus(t, submissions);
+
+        return {
+          id: t._id.toString(),
+          title: t.title,
+          description: t.description,
+          difficulty: t.difficulty,
+          techStack: t.techStack || [],
+          expectedTeamSize: t.expectedTeamSize,
+          deadline: t.deadline ? t.deadline.toISOString() : null,
+          status: t.status,
+          createdAt: t.createdAt ? t.createdAt.toISOString() : new Date().toISOString(),
+          unreviewed,
+          attention,
+        };
+      })
+    );
 
     return res.status(200).json(formatted);
   } catch (err) {

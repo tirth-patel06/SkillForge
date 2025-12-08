@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { api } from "@/lib/api";
-import { Loader2, Trash2, Clock, AlertCircle, Circle, CheckCircle } from "lucide-react";
+import { Loader2, Trash2, Clock, AlertCircle, Circle, CheckCircle, RefreshCw } from "lucide-react";
 import { TaskDetailPage } from "@/components/TaskDetailPage";
 
 export type TaskStatus = "PENDING" | "ACTIVE" | "APPROVED" | "REJECTED" | "REMOVED";
@@ -17,6 +17,11 @@ export type TaskItem = {
   deadline: string | null;
   status: TaskStatus;
   createdAt: string;
+  unreviewed?: number;
+  attention?: {
+    level: "critical" | "high" | "medium";
+    reason: string;
+  } | null;
 };
 
 const statusLabel: Record<TaskStatus, string> = {
@@ -47,6 +52,7 @@ function groupTasks(tasks: TaskItem[]) {
 export function MyTasks() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -54,14 +60,11 @@ export function MyTasks() {
 
   const grouped = useMemo(() => groupTasks(tasks), [tasks]);
 
-  useEffect(() => {
-    loadTasks();
-  }, []);
-
-  async function loadTasks() {
-    setLoading(true);
-    setError(null);
+  const loadTasks = useCallback(async () => {
     try {
+      if (tasks.length > 0) setRefreshing(true);
+      else setLoading(true);
+      setError(null);
       const { data } = await api.get<TaskItem[]>("/tasks");
       setTasks(data || []);
     } catch (err) {
@@ -69,7 +72,22 @@ export function MyTasks() {
       setError(error?.response?.data?.message || "Failed to load tasks");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  }, [tasks.length]);
+
+  useEffect(() => {
+    loadTasks();
+    // Auto-refresh every 30 seconds to update attention flags
+    const interval = setInterval(() => {
+      loadTasks();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [loadTasks]);
+
+  const handleManualRefresh = async () => {
+    setRefreshing(true);
+    await loadTasks();
   }
 
   async function removeTask(id: string) {
@@ -129,12 +147,32 @@ export function MyTasks() {
               }`}
             >
               <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
+                <div className="space-y-1 flex-1">
+                  <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                     <span className="font-semibold">{task.title}</span>
                     <span className={`text-xs px-2 py-1 rounded-full border border-zinc-700 ${statusColor[task.status]}`}>
                       {statusLabel[task.status]}
                     </span>
+                    {task.attention && (
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full border flex items-center space-x-1 ${
+                          task.attention.level === "critical"
+                            ? "border-red-700 bg-red-950/30 text-red-400"
+                            : task.attention.level === "high"
+                            ? "border-orange-700 bg-orange-950/30 text-orange-400"
+                            : "border-yellow-700 bg-yellow-950/30 text-yellow-400"
+                        }`}
+                        title={task.attention.reason}
+                      >
+                        <AlertCircle className="w-3 h-3" />
+                        <span>Needs Attention</span>
+                      </span>
+                    )}
+                    {task.unreviewed ? (
+                      <span className="text-xs px-2 py-1 rounded-full border border-blue-700 bg-blue-950/30 text-blue-400">
+                        {task.unreviewed} unreviewed
+                      </span>
+                    ) : null}
                   </div>
                   {task.description && (
                     <p className="text-sm text-zinc-400 line-clamp-2">{task.description}</p>
@@ -152,7 +190,7 @@ export function MyTasks() {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 ml-2">
                   {task.status === "ACTIVE" && (
                     <button
                       disabled={approvingId === task.id}
@@ -160,7 +198,7 @@ export function MyTasks() {
                         e.stopPropagation();
                         approveTask(task.id);
                       }}
-                      className="flex items-center space-x-2 text-sm text-green-400 hover:text-green-300 disabled:opacity-50 px-3 py-1 border border-green-700 rounded-lg hover:bg-green-900/20 transition-colors"
+                      className="flex items-center space-x-2 text-sm text-green-400 hover:text-green-300 disabled:opacity-50 px-3 py-1 border border-green-700 rounded-lg hover:bg-green-900/20 transition-colors whitespace-nowrap"
                     >
                       {approvingId === task.id ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -224,9 +262,20 @@ export function MyTasks() {
 
   return (
     <div className="p-8 space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-1">My Tasks</h2>
-        <p className="text-zinc-400">View, manage, and remove tasks you&apos;ve created.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold mb-1">My Tasks</h2>
+          <p className="text-zinc-400">View, manage, and remove tasks you&apos;ve created.</p>
+        </div>
+        <button
+          onClick={handleManualRefresh}
+          disabled={refreshing}
+          className="flex items-center space-x-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-lg transition-colors disabled:opacity-50"
+          title="Refresh task list and attention statuses"
+        >
+          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+          <span className="text-sm">{refreshing ? "Refreshing..." : "Refresh"}</span>
+        </button>
       </div>
 
       {error && (

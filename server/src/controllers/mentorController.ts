@@ -85,10 +85,52 @@ export const getMentorDashboard = async (req: AuthRequest, res: Response) => {
     //referralRequests = referrals in PENDING state for this mentor
     const referralRequests = referralsByStatus["PENDING"] || 0;
 
+    // Count critical attention tasks
+    let criticalAttentionCount = 0;
+    
+    // REJECTED tasks - Critical
+    const rejectedCount = await Task.countDocuments({
+      createdBy: mentorId,
+      status: "REJECTED",
+    });
+    criticalAttentionCount += rejectedCount;
+
+    // PENDING tasks for 14+ days - Critical
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+    const oldPendingCount = await Task.countDocuments({
+      createdBy: mentorId,
+      status: "PENDING",
+      createdAt: { $lt: fourteenDaysAgo },
+    });
+    criticalAttentionCount += oldPendingCount;
+
+    // ACTIVE tasks with 5+ unreviewed submissions - Critical
+    const tasksWithManyUnreviewed = await Submission.aggregate([
+      {
+        $match: {
+          taskId: { $in: taskIds },
+          status: "PENDING",
+        },
+      },
+      {
+        $group: {
+          _id: "$taskId",
+          unreviewedCount: { $sum: 1 },
+        },
+      },
+      {
+        $match: {
+          unreviewedCount: { $gte: 5 },
+        },
+      },
+    ]);
+    criticalAttentionCount += tasksWithManyUnreviewed.length;
+
     const dashboardPayload = {
       pendingReviews: pendingCount,
       activeTasks: tasks.length,
-      teamsNeedingAttention: 0,
+      teamsNeedingAttention: criticalAttentionCount,
       referralRequests,
       recentSubmissions: recentPendingSubmissions.map((sub) => ({
         id: sub._id.toString(),
