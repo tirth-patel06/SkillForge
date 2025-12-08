@@ -1,5 +1,5 @@
 // client/src/pages/AuthPage.tsx
-+"use client";
+"use client";
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -67,6 +67,7 @@ const AuthPage: React.FC = () => {
           password: form.password,
           role,
         });
+        
         setUser(res.data.user);
       }
     } catch (err: any) {
@@ -83,11 +84,13 @@ const AuthPage: React.FC = () => {
     setInfo(null);
     try {
       const res = await verifyEmailApi({ email: form.email, otp });
+      
       setUser(res.data.user);
       setInfo("Email verified!");
       alert("Verified ✅"); // popup
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "OTP verification failed");
+    } catch (err) {
+      const error = err as any;
+      setError(error?.response?.data?.message || "OTP verification failed");
     } finally {
       setLoading(false);
     }

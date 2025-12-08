@@ -18,12 +18,20 @@ export const getMyReferrals = async (req: AuthRequest, res: Response) => {
     })
       .populate("studentId", "name email")
       .populate("mentorId", "name email")
-      .select("-__v");
+      .select("-__v")
+      .lean();
 
-    return res.status(200).json({
-      message: "Referrals retrieved successfully",
-      referrals,
-    });
+    // Map to frontend format
+    const formattedReferrals = referrals.map(r => ({
+      id: r._id.toString(),
+      student_name: (r as any).studentId?.name || 'Unknown',
+      recommendation: r.recommendation || '',
+      evidence_links: r.evidenceLinks || [],
+      status: r.status,
+      created_at: r.createdAt?.toISOString() || new Date().toISOString(),
+    }));
+
+    return res.status(200).json(formattedReferrals);
   } catch (error) {
     console.error("Get my referrals error:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -33,21 +41,21 @@ export const getMyReferrals = async (req: AuthRequest, res: Response) => {
 // POST /referrals - Create a new referral
 export const createReferral = async (req: AuthRequest, res: Response) => {
   try {
-    const { mentorId, message } = req.body;
-    const studentId = req.user?.id;
+    const { studentId, recommendation, evidenceLinks, status } = req.body;
+    const mentorId = req.user?.id;
 
-    if (!mentorId || !studentId) {
+    if (!studentId || !mentorId) {
       return res
         .status(400)
-        .json({ message: "Mentor ID is required" });
+        .json({ message: "Student ID is required" });
     }
 
-    // Verify mentor exists and is a mentor
-    const mentor = await User.findById(mentorId);
-    if (!mentor || mentor.role !== "MENTOR") {
+    // Verify student exists and is a student
+    const student = await User.findById(studentId);
+    if (!student || student.role !== "STUDENT") {
       return res
         .status(400)
-        .json({ message: "Invalid mentor ID or user is not a mentor" });
+        .json({ message: "Invalid student ID or user is not a student" });
     }
 
     // Check if referral already exists
@@ -66,8 +74,9 @@ export const createReferral = async (req: AuthRequest, res: Response) => {
     const newReferral = new Referral({
       studentId,
       mentorId,
-      message: message || "",
-      status: "PENDING",
+      recommendation: recommendation || "",
+      evidenceLinks: evidenceLinks || [],
+      status: status || "PENDING",
     });
 
     await newReferral.save();

@@ -9,25 +9,59 @@ import mongoose from "mongoose";
 export const getSubmissions = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
+    const { status } = req.query;
 
     if (!userId) {
       return res.status(401).json({ message: "User not authenticated" });
     }
 
-    // Get submissions where user is the student or reviewer
-    const submissions = await Submission.find({
-      $or: [{ studentId: userId }, { reviewerId: userId }],
-    })
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Build query based on user role
+    let query: any;
+    
+    if (user.role === "MENTOR") {
+      // For mentors: get submissions for tasks they created
+      const tasks = await Task.find({ createdBy: userId }).select("_id");
+      const taskIds = tasks.map(t => t._id);
+      query = { taskId: { $in: taskIds } };
+    } else {
+      // For students: get their own submissions
+      query = { $or: [{ studentId: userId }, { reviewedBy: userId }] };
+    }
+
+    // Add status filter if provided
+    if (status) {
+      query.status = status;
+    }
+
+    const submissions = await Submission.find(query)
       .populate("taskId", "title description difficulty")
       .populate("studentId", "name email")
-      .populate("reviewerId", "name email")
+      .populate("reviewedBy", "name email")
       .populate("teamId", "name")
-      .select("-__v");
+      .select("-__v")
+      .lean();
 
-    return res.status(200).json({
-      message: "Submissions retrieved successfully",
-      submissions,
-    });
+    // Map to frontend format
+    const formattedSubmissions = submissions.map(sub => ({
+      id: sub._id.toString(),
+      task_id: (sub as any).taskId?._id?.toString() || '',
+      student_id: (sub as any).studentId?._id?.toString() || '',
+      version: sub.version || 1,
+      github_url: sub.githubUrl,
+      file_urls: sub.fileUrls,
+      notes: sub.notes,
+      status: sub.status,
+      submitted_at: sub.submittedAt?.toISOString() || new Date().toISOString(),
+      student_name: (sub as any).studentId?.name || 'Unknown',
+      task_title: (sub as any).taskId?.title || 'Unknown Task',
+    }));
+
+    return res.status(200).json(formattedSubmissions);
   } catch (error) {
     console.error("Get submissions error:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -52,13 +86,17 @@ export const getTaskRubric = async (req: AuthRequest, res: Response) => {
     // Get all rubric criteria for this task
     const criteria = await RubricCriteria.find({
       taskId: taskId,
-    }).select("-__v");
+    }).select("-__v").lean();
 
-    return res.status(200).json({
-      message: "Rubric criteria retrieved successfully",
-      taskId,
-      criteria,
-    });
+    // Map to frontend format
+    const formattedCriteria = criteria.map(c => ({
+      id: c._id.toString(),
+      name: c.name,
+      description: c.description || '',
+      weightage: c.weightage,
+    }));
+
+    return res.status(200).json(formattedCriteria);
   } catch (error) {
     console.error("Get task rubric error:", error);
     return res.status(500).json({ message: "Internal server error" });

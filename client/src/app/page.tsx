@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { MentorLayout } from "@/components/MentorLayout";
 import { Dashboard } from "@/components/Dashboard";

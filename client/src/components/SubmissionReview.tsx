@@ -34,7 +34,7 @@ type RubricCriteria = {
 };
 
 type Score = {
-  criteria_id: string;
+  criteriaId: string;
   score: number;
   feedback: string;
 };
@@ -87,7 +87,7 @@ export function SubmissionReview() {
       setRubricCriteria(data || []);
       setScores(
         (data || []).map((c) => ({
-          criteria_id: c.id,
+          criteriaId: c.id,
           score: 0,
           feedback: "",
         }))
@@ -99,7 +99,7 @@ export function SubmissionReview() {
 
   const updateScore = (criteriaId: string, field: "score" | "feedback", value: number | string) => {
     setScores((prev) =>
-      prev.map((s) => (s.criteria_id === criteriaId ? { ...s, [field]: value } : s))
+      prev.map((s) => (s.criteriaId === criteriaId ? { ...s, [field]: value } : s))
     );
   };
 
@@ -112,7 +112,7 @@ export function SubmissionReview() {
     try {
       await api.post(`/submissions/${selectedSubmission.id}/review`, {
         scores,
-        generalFeedback,
+        feedback: generalFeedback,
         status: newStatus,
       });
 
@@ -275,7 +275,7 @@ export function SubmissionReview() {
 
               <div className="space-y-6">
                 {rubricCriteria.map((criteria) => {
-                  const score = scores.find((s) => s.criteria_id === criteria.id);
+                  const score = scores.find((s) => s.criteriaId === criteria.id);
 
                   return (
                     <div key={criteria.id} className="border-b border-zinc-800 pb-6 last:border-0">

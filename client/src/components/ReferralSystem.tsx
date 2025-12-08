@@ -149,7 +149,7 @@ export function ReferralSystem() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2 flex items-center">
+              <label className="text-sm font-medium text-zinc-300 mb-2 flex items-center">
                 <User className="w-4 h-4 mr-2" />
                 Select Student <span className="text-red-400 ml-1">*</span>
               </label>
@@ -186,7 +186,7 @@ export function ReferralSystem() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2 flex items-center">
+              <label className="text-sm font-medium text-zinc-300 mb-2 flex items-center">
                 <LinkIcon className="w-4 h-4 mr-2" />
                 Evidence Links
               </label>

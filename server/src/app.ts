@@ -35,13 +35,12 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-app.use("/api/mentor", mentorRoutes);   
+app.use("/api/auth", authRoutes);
+app.use("/api/mentor", mentorRoutes);           
 app.use("/api/students", studentRoutes);        
 app.use("/api/tasks", taskRoutes);              
 app.use("/api/submissions", submissionRoutes); 
 app.use("/api/referrals", referralRoutes);     
-app.use("/api/students", studentRoutes);        
-app.use("/api/auth", authRoutes);
 
 // 404 Handler
 app.use((_req, res) => {

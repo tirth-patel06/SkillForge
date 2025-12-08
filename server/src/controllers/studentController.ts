@@ -10,10 +10,14 @@ export const getStudents = async (req: AuthRequest, res: Response) => {
       .select("name email")
       .limit(100);
 
-    return res.status(200).json({
-      message: "Students retrieved successfully",
-      students,
-    });
+    // Map to frontend format
+    const formattedStudents = students.map(s => ({
+      id: s._id.toString(),
+      name: s.name,
+      email: s.email,
+    }));
+
+    return res.status(200).json(formattedStudents);
   } catch (error) {
     console.error("Get students error:", error);
     return res.status(500).json({ message: "Internal server error" });
