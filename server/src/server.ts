@@ -1,5 +1,6 @@
 import app from "./app";
 import mongoose from "mongoose";
+import { seedDemo } from "./utils/seed";
 const connectedDb=async()=>{
     try {
     await mongoose.connect("mongodb+srv://admin:aditya123@cluster0.pbdlbep.mongodb.net/hustleHaveli2")
@@ -15,6 +16,9 @@ const connectedDb=async()=>{
 }
 const startServer = async ()=> {
     await connectedDb();
+    console.log("DB connected")
+    await seedDemo()
+    console.log("Seeded the DB")
 }
 startServer();
 app.listen(8000, ()=>console.log(`server on 8000`));
