@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { LandingPage } from "@/components/LandingPage";
 
 export default function HomePage() {
   const router = useRouter();
 
-  useEffect(() => {
-    router.replace("/auth");
-  }, [router]);
+  const handleGetStarted = () => {
+    router.push("/auth");
+  };
 
-  return null;
+  return <LandingPage onGetStarted={handleGetStarted} />;
 }

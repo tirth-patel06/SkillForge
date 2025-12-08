@@ -96,7 +96,7 @@ const AuthPage: React.FC = () => {
     }
   };
 
-  const githubUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/github`;
+  const githubUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/github`;
 
 
   return (

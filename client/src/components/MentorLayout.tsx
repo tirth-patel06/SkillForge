@@ -1,5 +1,6 @@
 import { LayoutDashboard, FileText, ClipboardCheck, Users, LogOut, ListChecks } from "lucide-react";
 import type React from "react";
+import Link from "next/link";
 
 type PageId = "dashboard" | "create-task" | "my-tasks" | "reviews" | "referrals";
 
@@ -72,15 +73,17 @@ export function MentorLayout({ children, currentPage, onNavigate, user, onLogout
 
         <div className="p-4 border-t border-zinc-800 space-y-3">
           {/* Profile Section */}
-          <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-zinc-900/50">
-            <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">{getInitials()}</span>
+          <Link href="/mentor/profile">
+            <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors cursor-pointer">
+              <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+                <span className="text-white font-semibold text-sm">{getInitials()}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{user?.name || "User"}</p>
+                <p className="text-xs text-zinc-400 truncate">{user?.email || "user@example.com"}</p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user?.name || "User"}</p>
-              <p className="text-xs text-zinc-400 truncate">{user?.email || "user@example.com"}</p>
-            </div>
-          </div>
+          </Link>
 
           {/* Logout Button */}
           {onLogout && (

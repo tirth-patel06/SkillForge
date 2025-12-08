@@ -37,7 +37,7 @@ export function Dashboard() {
 
   async function loadDashboardStats() {
     try {
-      const { data } = await api.get<DashboardStats>("/mentor/dashboard");
+      const { data } = await api.get<DashboardStats>("/mentors/dashboard");
       setStats(data);
     } catch (error) {
       console.error("Error loading dashboard stats:", error);
