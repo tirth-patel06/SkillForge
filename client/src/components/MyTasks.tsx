@@ -285,6 +285,73 @@ export function MyTasks() {
         </div>
       )}
 
+      {/* Attention Triggers Reference */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2">
+          <AlertCircle className="w-5 h-5 text-amber-500" />
+          <span>Attention Triggers & Guidelines</span>
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Critical Level */}
+          <div className="border border-red-800/50 rounded-lg p-4 bg-red-950/20">
+            <div className="flex items-center space-x-2 mb-3">
+              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <h4 className="font-semibold text-red-300">CRITICAL Level</h4>
+            </div>
+            <ul className="text-sm text-zinc-300 space-y-2">
+              <li className="flex items-start space-x-2">
+                <span className="text-red-400 font-bold">•</span>
+                <span>Task status is <span className="font-semibold text-red-300">REJECTED</span> (needs revision)</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-red-400 font-bold">•</span>
+                <span><span className="font-semibold text-red-300">ACTIVE</span> task with 5+ unreviewed submissions</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-red-400 font-bold">•</span>
+                <span><span className="font-semibold text-red-300">PENDING</span> for 14+ days (stuck in approval)</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* High Level */}
+          <div className="border border-orange-800/50 rounded-lg p-4 bg-orange-950/20">
+            <div className="flex items-center space-x-2 mb-3">
+              <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+              <h4 className="font-semibold text-orange-300">HIGH Level</h4>
+            </div>
+            <ul className="text-sm text-zinc-300 space-y-2">
+              <li className="flex items-start space-x-2">
+                <span className="text-orange-400 font-bold">•</span>
+                <span><span className="font-semibold text-orange-300">ACTIVE</span> task with 3-4 unreviewed submissions</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-orange-400 font-bold">•</span>
+                <span><span className="font-semibold text-orange-300">PENDING</span> for 7-13 days</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Medium Level */}
+          <div className="border border-yellow-800/50 rounded-lg p-4 bg-yellow-950/20">
+            <div className="flex items-center space-x-2 mb-3">
+              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <h4 className="font-semibold text-yellow-300">MEDIUM Level</h4>
+            </div>
+            <ul className="text-sm text-zinc-300 space-y-2">
+              <li className="flex items-start space-x-2">
+                <span className="text-yellow-400 font-bold">•</span>
+                <span><span className="font-semibold text-yellow-300">ACTIVE</span> task with 1-2 unreviewed submissions</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-yellow-400 font-bold">•</span>
+                <span><span className="font-semibold text-yellow-300">PENDING</span> for 3-6 days</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {renderList(grouped.ACTIVE, "Active", "text-blue-400")}
         {renderList(grouped.PENDING, "Pending", "text-amber-400")}
