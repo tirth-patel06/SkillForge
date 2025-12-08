@@ -1,21 +1,51 @@
-import express from "express"
-import cors from 'cors';
-import authRoutes from "./routes/auth";
-import taskRoutes from "./routes/task";
-import { Express } from "express";
-import referralRoutes from "./routes/referral"; 
-import cookieParser from 'cookie-parser';
+// server/src/app.ts
+import express from "express";
+import cors from "cors";
+import morgan from "morgan";
+import cookieParser from "cookie-parser";
+
+// Route imports
+import authRoutes from './routes/authRoutes'
+import studentRoutes from "./routes/studentRoutes";
+ //import mentorRoutes from "./routes/mentorRoutes.ts";
+ //import taskRoutes from "./routes/taskRoutes";
+ ////import submissionRoutes from "./routes/submissionRoutes";
+//import referralRoutes from "./routes/referralRoutes";
 
 const app = express();
 
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
-}));
-app.use(express.json()); 
-app.use(express.urlencoded({ extended: true }));
+const allowedOrigins = ["http://localhost:3000"];
+
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+
+app.use(express.json());
 app.use(cookieParser());
-app.use("/auth", authRoutes);
-app.use("/tasks", taskRoutes);
-app.use("/referrals", referralRoutes);
+app.use(morgan("dev"));
+
+// Health check
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
+
+// app.use("/api/mentor", mentorRoutes);           
+ //app.use("/api/tasks", taskRoutes);              
+ //app.use("/api/submissions", submissionRoutes); 
+ //app.use("/api/referrals", referralRoutes);     
+app.use("/api/students", studentRoutes);        
+app.use("/api/auth", authRoutes);
+
+// 404 Handler
+app.use((_req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
+//import referralRoutes from "./routes/referral"; 
+//app.use("/referrals", referralRoutes);
 export default app

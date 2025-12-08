@@ -3,16 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-  "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
-
-
+    "dev": "nodemon src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
@@ -21,12 +17,17 @@
     "express": "^5.2.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.0.0",
+    "mongo": "^0.1.0",
+    "mongodb": "^7.0.0",
+    "mongoose": "^9.0.1",
     "morgan": "^1.10.1",
     "nodemailer": "^7.0.11",
-    "pdfkit": "^0.17.2"
+    "nodemon": "^3.1.11",
+    "passport": "^0.7.0",
+    "passport-github2": "^0.1.12"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
@@ -34,6 +35,9 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.10.1",
+    "@types/nodemailer": "^7.0.4",
+    "@types/passport": "^1.0.17",
+    "@types/passport-github2": "^1.2.9",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
     "eslint": "^9.39.1",
