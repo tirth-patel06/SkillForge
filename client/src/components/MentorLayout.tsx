@@ -1,7 +1,7 @@
-import { LayoutDashboard, FileText, ClipboardCheck, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, ClipboardCheck, Users, LogOut, ListChecks } from "lucide-react";
 import type React from "react";
 
-type PageId = "dashboard" | "tasks" | "reviews" | "referrals";
+type PageId = "dashboard" | "create-task" | "my-tasks" | "reviews" | "referrals";
 
 type User = {
   id: string;
@@ -21,7 +21,8 @@ type MentorLayoutProps = {
 export function MentorLayout({ children, currentPage, onNavigate, user, onLogout }: MentorLayoutProps) {
   const navItems = [
     { id: "dashboard" as const, icon: LayoutDashboard, label: "Dashboard" },
-    { id: "tasks" as const, icon: FileText, label: "Tasks" },
+    { id: "my-tasks" as const, icon: ListChecks, label: "My Tasks" },
+    { id: "create-task" as const, icon: FileText, label: "Create Task" },
     { id: "reviews" as const, icon: ClipboardCheck, label: "Reviews" },
     { id: "referrals" as const, icon: Users, label: "Referrals" },
   ];
@@ -72,7 +73,7 @@ export function MentorLayout({ children, currentPage, onNavigate, user, onLogout
         <div className="p-4 border-t border-zinc-800 space-y-3">
           {/* Profile Section */}
           <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-zinc-900/50">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center">
               <span className="text-white font-semibold text-sm">{getInitials()}</span>
             </div>
             <div className="flex-1 min-w-0">

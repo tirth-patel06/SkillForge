@@ -8,10 +8,11 @@ import { Dashboard } from "@/components/Dashboard";
 import { TaskCreation } from "@/components/TaskCreation";
 import { SubmissionReview } from "@/components/SubmissionReview";
 import { ReferralSystem } from "@/components/ReferralSystem";
+import { MyTasks } from "@/components/MyTasks";
 import { useAuth } from "@/context/AuthContext";
 import { logoutApi } from "@/api/auth";
 
-type Page = "dashboard" | "tasks" | "reviews" | "referrals";
+type Page = "dashboard" | "my-tasks" | "create-task" | "reviews" | "referrals";
 
 function MentorDashboardInner() {
   const [currentPage, setCurrentPage] = useState<Page>("dashboard");
@@ -35,7 +36,9 @@ function MentorDashboardInner() {
     switch (currentPage) {
       case "dashboard":
         return <Dashboard />;
-      case "tasks":
+      case "my-tasks":
+        return <MyTasks />;
+      case "create-task":
         return <TaskCreation />;
       case "reviews":
         return <SubmissionReview />;
