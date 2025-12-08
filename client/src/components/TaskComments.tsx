@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+"use client";
+
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-import { Heart, Trash2, Edit2, Reply, Send, X } from "lucide-react";
+import { Heart, Trash2, Edit2, Reply, Send } from "lucide-react";
 
 interface Comment {
   _id: string;
@@ -13,7 +15,7 @@ interface Comment {
   authorProfilePhoto?: string;
   content: string;
   parentCommentId?: string;
-  likes: any[];
+  likes: Array<string | { _id: string }>;
   edited: boolean;
   editedAt?: string;
   createdAt: string;
@@ -30,19 +32,14 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
-  const [replyContent, setReplyContent] = useState("");
+  const replyTextareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch comments
-  useEffect(() => {
-    fetchComments();
-  }, [taskId]);
-
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get(`/tasks/${taskId}/comments`);
@@ -55,7 +52,12 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [taskId]);
+
+  // Fetch comments on mount
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
 
   const handlePostComment = async () => {
     if (!newComment.trim()) return;
@@ -78,18 +80,23 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
     }
   };
 
-  const handleReply = async () => {
-    if (!replyContent.trim() || !replyingTo) return;
+  const handleReply = useCallback(async (parentId: string) => {
+    const textarea = replyTextareaRefs.current[parentId];
+    const replyContent = textarea?.value || "";
+    
+    if (!replyContent?.trim()) return;
 
     try {
       setSubmitting(true);
       setError(null);
       const res = await api.post(`/tasks/${taskId}/comments`, {
         content: replyContent,
-        parentCommentId: replyingTo,
+        parentCommentId: parentId,
       });
       if (res.data.success) {
-        setReplyContent("");
+        if (textarea) {
+          textarea.value = "";
+        }
         setReplyingTo(null);
         fetchComments();
       }
@@ -99,13 +106,14 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [taskId, fetchComments]);
 
   const handleEdit = async (commentId: string) => {
     if (!editContent.trim()) return;
 
     try {
       setSubmitting(true);
+      setError(null);
       const res = await api.put(`/comments/${commentId}`, {
         content: editContent,
       });
@@ -123,9 +131,10 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
   };
 
   const handleDelete = async (commentId: string) => {
-    if (!window.confirm("Delete this comment?")) return;
+    if (!confirm("Are you sure you want to delete this comment?")) return;
 
     try {
+      setError(null);
       const res = await api.delete(`/comments/${commentId}`);
       if (res.data.success) {
         fetchComments();
@@ -144,6 +153,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
       }
     } catch (err) {
       console.error("Error liking comment:", err);
+      setError("Failed to like comment");
     }
   };
 
@@ -160,16 +170,32 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
     }
   };
 
-  const CommentItem = ({
-    comment,
-    isReply = false,
-  }: {
-    comment: Comment;
-    isReply?: boolean;
-  }) => {
+  // Separate replies from top-level comments
+  const { topLevelComments, repliesByParent } = useMemo(() => {
+    const top: Comment[] = [];
+    const replies: Record<string, Comment[]> = {};
+
+    comments.forEach((comment) => {
+      if (!comment.parentCommentId) {
+        top.push(comment);
+      } else {
+        if (!replies[comment.parentCommentId]) {
+          replies[comment.parentCommentId] = [];
+        }
+        replies[comment.parentCommentId].push(comment);
+      }
+    });
+
+    return { topLevelComments: top, repliesByParent: replies };
+  }, [comments]);
+
+  const CommentItem = ({ comment, isReply = false }: { comment: Comment; isReply?: boolean }) => {
     const canEdit = user?.id === comment.authorId;
     const canDelete = user?.id === comment.authorId || user?.role === "ADMIN";
-    const isLiked = comment.likes.some((like: any) => like._id === user?.id);
+    const isLiked = comment.likes.some((like) => 
+      typeof like === 'string' ? like === user?.id : like._id === user?.id
+    );
+    const replies = repliesByParent[comment._id] || [];
 
     return (
       <div
@@ -309,16 +335,19 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
         {replyingTo === comment._id && (
           <div className="mt-3 ml-8 bg-zinc-900/30 rounded-lg p-3">
             <textarea
-              value={replyContent}
-              onChange={(e) => setReplyContent(e.target.value)}
+              ref={(el) => {
+                replyTextareaRefs.current[comment._id] = el;
+              }}
+              defaultValue=""
               className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-white placeholder-zinc-500 text-sm mb-2"
               placeholder="Write a reply..."
               rows={2}
+              autoFocus
             />
             <div className="flex space-x-2">
               <button
-                onClick={handleReply}
-                disabled={submitting || !replyContent.trim()}
+                onClick={() => handleReply(comment._id)}
+                disabled={submitting}
                 className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium disabled:opacity-50 flex items-center space-x-1"
               >
                 <Send className="w-3 h-3" />
@@ -326,8 +355,11 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
               </button>
               <button
                 onClick={() => {
+                  const textarea = replyTextareaRefs.current[comment._id];
+                  if (textarea) {
+                    textarea.value = "";
+                  }
                   setReplyingTo(null);
-                  setReplyContent("");
                 }}
                 className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded text-sm font-medium"
               >
@@ -338,17 +370,11 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
         )}
 
         {/* Replies */}
-        {!isReply && (
+        {!isReply && replies.length > 0 && (
           <div className="mt-3">
-            {comments
-              .filter((c) => c.parentCommentId === comment._id)
-              .map((reply) => (
-                <CommentItem
-                  key={reply._id}
-                  comment={reply}
-                  isReply={true}
-                />
-              ))}
+            {replies.map((reply) => (
+              <CommentItem key={reply._id} comment={reply} isReply={true} />
+            ))}
           </div>
         )}
       </div>
@@ -395,17 +421,15 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
           </div>
           <p className="text-zinc-400 mt-2 text-sm">Loading comments...</p>
         </div>
-      ) : comments.length === 0 ? (
+      ) : topLevelComments.length === 0 ? (
         <div className="text-center py-8 text-zinc-500">
           <p>No comments yet. Be the first to comment!</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {comments
-            .filter((c) => !c.parentCommentId) // Only top-level comments
-            .map((comment) => (
-              <CommentItem key={comment._id} comment={comment} />
-            ))}
+          {topLevelComments.map((comment) => (
+            <CommentItem key={comment._id} comment={comment} />
+          ))}
         </div>
       )}
     </div>

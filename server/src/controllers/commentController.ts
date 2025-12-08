@@ -11,11 +11,9 @@ export const getTaskComments = async (req: AuthRequest, res: Response) => {
 
     const query: any = { taskId };
     
-    // If parentCommentId is provided, get replies; otherwise get top-level comments
+    // If parentCommentId is provided, filter by it
     if (parentCommentId) {
       query.parentCommentId = parentCommentId;
-    } else {
-      query.parentCommentId = null;
     }
 
     const comments = await TaskComment.find(query)
