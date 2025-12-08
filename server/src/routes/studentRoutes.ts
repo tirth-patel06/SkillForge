@@ -1,13 +1,18 @@
 import { Router } from "express";
-import { authMiddleware } from "../middleware/auth";
+import { getMyProfile, updateMyProfile, getPublicProfile } from "../controllers/studentProfileController";
 import { getStudents } from "../controllers/studentController";
+import { requireStudent } from "../middleware/requireStudent";
+import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
-// All student routes require authentication
-router.use(authMiddleware);
+// GET /api/students/me/profile
+router.get("/me/profile", requireAuth, requireStudent, getMyProfile);
 
-// Get all students
-router.get("/", getStudents);
+// PUT /api/students/me/profile
+router.put("/me/profile", requireAuth, requireStudent, updateMyProfile);
+
+// PUBLIC route (no auth required for now)
+router.get("/:id/profile", getPublicProfile);
 
 export default router;

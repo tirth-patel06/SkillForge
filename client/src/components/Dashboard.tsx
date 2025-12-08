@@ -175,7 +175,7 @@ function StatCard({ title, value, subtitle, icon: Icon, color }: StatCardProps) 
   return (
     <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all">
       <div className="flex items-start justify-between mb-4">
-        <div className={`p-3 rounded-lg bg-gradient-to-br ${color}`}>
+        <div className={`p-3 rounded-lg bg-linear-to-br ${color}`}>
           <Icon className="w-6 h-6 text-white" />
         </div>
       </div>
@@ -208,6 +208,9 @@ function ActionButton({ title, description, icon: Icon }: ActionButtonProps) {
   );
 }
 
+
+
+
 function FileTextIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -224,5 +227,6 @@ function FileTextIcon({ className }: { className?: string }) {
         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
       />
     </svg>
+    
   );
 }
