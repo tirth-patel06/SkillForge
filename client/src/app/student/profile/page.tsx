@@ -43,9 +43,8 @@ const StudentProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [profile, setProfile] = useState<StudentProfile>(emptyProfile);
-  const [originalProfile, setOriginalProfile] = useState<StudentProfile | null>(
-    null
-  );
+  const [originalProfile, setOriginalProfile] =
+    useState<StudentProfile | null>(null);
 
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -61,16 +60,12 @@ const StudentProfilePage: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const token =
-          typeof window !== "undefined"
-            ? localStorage.getItem("token")
-            : null;
-
         const res = await fetch(`${API_BASE_URL}/api/students/me/profile`, {
+          method: "GET",
           headers: {
             "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
+          credentials: "include", // send cookies (JWT)
         });
 
         if (!res.ok) {
@@ -96,7 +91,6 @@ const StudentProfilePage: React.FC = () => {
   }, []);
 
   // Helpers to update nested fields
-
   const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setProfile((prev) => ({ ...prev, bio: e.target.value }));
   };
@@ -243,17 +237,12 @@ const StudentProfilePage: React.FC = () => {
       setSaving(true);
       setError(null);
 
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("token")
-          : null;
-
       const res = await fetch(`${API_BASE_URL}/api/students/me/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
+        credentials: "include",
         body: JSON.stringify(profile),
       });
 
@@ -289,109 +278,41 @@ const StudentProfilePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#020617",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#e5e7eb",
-        }}
-      >
+      <div className="min-h-screen flex items-center justify-center bg-[#020617] text-slate-200">
         Loading profile...
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "radial-gradient(circle at top, #1e293b 0, #020617 55%)",
-        color: "#e5e7eb",
-        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-        padding: "2rem 1rem",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 960,
-          margin: "0 auto",
-        }}
-      >
+    <div className="min-h-screen bg-[#02040a] text-slate-100">
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
-        <header
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: "1rem",
-            alignItems: "center",
-            marginBottom: "1.5rem",
-          }}
-        >
+        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1
-              style={{
-                fontSize: "1.75rem",
-                fontWeight: 600,
-                marginBottom: "0.25rem",
-              }}
-            >
+            <h1 className="text-2xl font-semibold tracking-tight">
               Student Profile
             </h1>
-            <p style={{ fontSize: "0.9rem", color: "#9ca3af" }}>
+            <p className="text-sm text-zinc-400">
               This profile is what mentors and recruiters will see when
               evaluating you.
             </p>
           </div>
-          <div style={{ textAlign: "right", fontSize: "0.9rem" }}>
-            <div style={{ fontWeight: 500 }}>{name || "Unnamed Student"}</div>
-            <div style={{ color: "#9ca3af" }}>{email}</div>
+          <div className="text-sm text-right">
+            <p className="font-medium">{name || "Unnamed Student"}</p>
+            <p className="text-zinc-400">{email}</p>
           </div>
         </header>
 
         {/* Main card */}
-        <div
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(30,64,175,0.45), rgba(15,23,42,0.95))",
-            borderRadius: "1.25rem",
-            padding: "1.5rem",
-            border: "1px solid rgba(148,163,184,0.35)",
-            boxShadow:
-              "0 24px 60px rgba(15,23,42,0.9), 0 0 0 1px rgba(15,23,42,0.6)",
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1.4fr)",
-            gap: "1.5rem",
-          }}
-        >
+        <div className="rounded-2xl border border-zinc-800 bg-linear-to-br from-slate-900/80 via-black to-black shadow-[0_24px_60px_rgba(0,0,0,0.9)] p-6 grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
           {/* Left: Form */}
-          <form onSubmit={handleSave} style={{ minWidth: 0 }}>
-            {/* Bio */}
-            <section style={{ marginBottom: "1rem" }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "0.5rem",
-                }}
-              >
-                <h2
-                  style={{
-                    fontSize: "1rem",
-                    fontWeight: 600,
-                  }}
-                >
-                  About You
-                </h2>
-                <span
-                  style={{
-                    fontSize: "0.75rem",
-                    color: "#9ca3af",
-                  }}
-                >
+          <form onSubmit={handleSave} className="space-y-6">
+            {/* About you */}
+            <section className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold">About You</h2>
+                <span className="text-[11px] text-zinc-500">
                   {profile.bio?.length || 0}/500
                 </span>
               </div>
@@ -400,135 +321,93 @@ const StudentProfilePage: React.FC = () => {
                 onChange={handleBioChange}
                 disabled={!isEditing}
                 rows={4}
-                style={{
-                  width: "100%",
-                  backgroundColor: "rgba(15,23,42,0.9)",
-                  borderRadius: "0.75rem",
-                  border: fieldErrors.bio
-                    ? "1px solid #f97373"
-                    : "1px solid rgba(148,163,184,0.6)",
-                  padding: "0.75rem",
-                  color: "#e5e7eb",
-                  fontSize: "0.9rem",
-                  outline: "none",
-                  resize: "vertical",
-                }}
+                className={`w-full rounded-xl border bg-black/80 px-3 py-2 text-sm text-slate-100 outline-none resize-y ${
+                  fieldErrors.bio
+                    ? "border-red-500/70"
+                    : "border-zinc-700 focus:border-zinc-400"
+                }`}
                 placeholder="Tell mentors about your interests, experience, and goals..."
               />
               {fieldErrors.bio && (
-                <p style={{ color: "#f97373", fontSize: "0.75rem" }}>
-                  {fieldErrors.bio}
+                <p className="text-[11px] text-red-400">{fieldErrors.bio}</p>
+              )}
+            </section>
+
+            {/* Profile photo URL */}
+            <section className="space-y-1">
+              <h2 className="text-sm font-semibold">Profile Photo URL</h2>
+              <input
+                type="text"
+                value={profile.profilePhotoUrl || ""}
+                onChange={handlePhotoChange}
+                disabled={!isEditing}
+                placeholder="https://your-image-url"
+                className={`w-full rounded-xl border bg-black/80 px-3 py-2 text-sm text-slate-100 outline-none ${
+                  fieldErrors.profilePhotoUrl
+                    ? "border-red-500/70"
+                    : "border-zinc-700 focus:border-zinc-400"
+                }`}
+              />
+              {fieldErrors.profilePhotoUrl && (
+                <p className="text-[11px] text-red-400">
+                  {fieldErrors.profilePhotoUrl}
                 </p>
               )}
             </section>
 
             {/* Skills */}
-            <section style={{ marginBottom: "1rem" }}>
-              <h2
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  marginBottom: "0.35rem",
-                }}
-              >
-                Skills
-              </h2>
-              <p
-                style={{
-                  fontSize: "0.8rem",
-                  color: "#9ca3af",
-                  marginBottom: "0.35rem",
-                }}
-              >
-                Add the technologies and domains you can work on. These show up
-                as tags for mentors.
-              </p>
-              <div
-                style={{
-                  display: "flex",
-                  gap: "0.5rem",
-                  marginBottom: "0.5rem",
-                }}
-              >
+            <section className="space-y-2">
+              <div>
+                <h2 className="text-sm font-semibold">Skills</h2>
+                <p className="text-[11px] text-zinc-500">
+                  Add technologies and domains you can work on. These show up as
+                  tags for mentors.
+                </p>
+              </div>
+
+              <div className="flex gap-2">
                 <input
                   type="text"
                   value={skillInput}
                   onChange={handleSkillInputChange}
                   disabled={!isEditing}
                   placeholder="e.g. React, Node.js, Machine Learning"
-                  style={{
-                    flex: 1,
-                    backgroundColor: "rgba(15,23,42,0.9)",
-                    borderRadius: "999px",
-                    border: fieldErrors.skills
-                      ? "1px solid #f97373"
-                      : "1px solid rgba(148,163,184,0.6)",
-                    padding: "0.5rem 0.75rem",
-                    color: "#e5e7eb",
-                    fontSize: "0.85rem",
-                    outline: "none",
-                  }}
+                  className={`flex-1 rounded-full border bg-black/80 px-3 py-2 text-xs text-slate-100 outline-none ${
+                    fieldErrors.skills
+                      ? "border-red-500/70"
+                      : "border-zinc-700 focus:border-zinc-400"
+                  }`}
                 />
                 <button
                   type="button"
                   onClick={handleAddSkill}
                   disabled={!isEditing}
-                  style={{
-                    borderRadius: "999px",
-                    border: "none",
-                    padding: "0.45rem 0.9rem",
-                    fontSize: "0.85rem",
-                    fontWeight: 500,
-                    cursor: isEditing ? "pointer" : "not-allowed",
-                    background:
-                      "linear-gradient(135deg, #4f46e5, #7c3aed, #ec4899)",
-                    color: "#f9fafb",
-                    opacity: isEditing ? 1 : 0.5,
-                  }}
+                  className={`rounded-full px-3 py-2 text-xs font-medium text-slate-50 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 ${
+                    isEditing ? "" : "opacity-50 cursor-not-allowed"
+                  }`}
                 >
                   Add
                 </button>
               </div>
+
               {fieldErrors.skills && (
-                <p style={{ color: "#f97373", fontSize: "0.75rem" }}>
+                <p className="text-[11px] text-red-400">
                   {fieldErrors.skills}
                 </p>
               )}
-              <div
-                style={{
-                  marginTop: "0.25rem",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: "0.4rem",
-                }}
-              >
+
+              <div className="mt-1 flex flex-wrap gap-2">
                 {profile.skills.map((skill) => (
                   <span
                     key={skill}
-                    style={{
-                      padding: "0.25rem 0.6rem",
-                      borderRadius: "999px",
-                      border: "1px solid rgba(148,163,184,0.8)",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "0.35rem",
-                      fontSize: "0.8rem",
-                      background:
-                        "radial-gradient(circle at top left, rgba(56,189,248,0.16), rgba(15,23,42,0.96))",
-                    }}
+                    className="inline-flex items-center gap-1 rounded-full border border-zinc-600 bg-linear-to-br from-sky-500/10 to-slate-950 px-2 py-1 text-[11px]"
                   >
                     {skill}
                     {isEditing && (
                       <button
                         type="button"
                         onClick={() => handleRemoveSkill(skill)}
-                        style={{
-                          border: "none",
-                          background: "transparent",
-                          cursor: "pointer",
-                          fontSize: "0.85rem",
-                          color: "#f97373",
-                        }}
+                        className="text-red-400 text-[11px]"
                       >
                         ✕
                       </button>
@@ -539,181 +418,198 @@ const StudentProfilePage: React.FC = () => {
             </section>
 
             {/* Education */}
-            <section style={{ marginBottom: "1rem" }}>
-              <h2
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  marginBottom: "0.35rem",
-                }}
-              >
-                Education
-              </h2>
-              <div style={{ marginBottom: "0.45rem" }}>
-                <label style={{ fontSize: "0.8rem" }}>
+            <section className="space-y-3">
+              <h2 className="text-sm font-semibold">Education</h2>
+
+              <div className="space-y-2">
+                <label className="text-[11px] text-zinc-400">
                   College Name
                   <input
                     type="text"
                     value={profile.education?.collegeName || ""}
                     onChange={handleEducationChange("collegeName")}
                     disabled={!isEditing}
-                    style={{
-                      width: "100%",
-                      marginTop: "0.15rem",
-                      backgroundColor: "rgba(15,23,42,0.9)",
-                      borderRadius: "0.6rem",
-                      border: "1px solid rgba(148,163,184,0.6)",
-                      padding: "0.45rem 0.6rem",
-                      color: "#e5e7eb",
-                      fontSize: "0.85rem",
-                      outline: "none",
-                    }}
+                    className="mt-1 w-full rounded-lg border border-zinc-700 bg-black/80 px-3 py-2 text-xs text-slate-100 outline-none focus:border-zinc-400"
                   />
                 </label>
               </div>
-              <div style={{ marginBottom: "0.45rem" }}>
-                <label style={{ fontSize: "0.8rem" }}>
+
+              <div className="space-y-2">
+                <label className="text-[11px] text-zinc-400">
                   Degree
                   <input
                     type="text"
                     value={profile.education?.degree || ""}
                     onChange={handleEducationChange("degree")}
                     disabled={!isEditing}
-                    style={{
-                      width: "100%",
-                      marginTop: "0.15rem",
-                      backgroundColor: "rgba(15,23,42,0.9)",
-                      borderRadius: "0.6rem",
-                      border: "1px solid rgba(148,163,184,0.6)",
-                      padding: "0.45rem 0.6rem",
-                      color: "#e5e7eb",
-                      fontSize: "0.85rem",
-                      outline: "none",
-                    }}
                     placeholder="B.Tech, M.Tech, etc."
+                    className="mt-1 w-full rounded-lg border border-zinc-700 bg-black/80 px-3 py-2 text-xs text-slate-100 outline-none focus:border-zinc-400"
                   />
                 </label>
               </div>
-              <div style={{ marginBottom: "0.45rem" }}>
-                <label style={{ fontSize: "0.8rem" }}>
+
+              <div className="space-y-2">
+                <label className="text-[11px] text-zinc-400">
                   Branch
                   <input
                     type="text"
                     value={profile.education?.branch || ""}
                     onChange={handleEducationChange("branch")}
                     disabled={!isEditing}
-                    style={{
-                      width: "100%",
-                      marginTop: "0.15rem",
-                      backgroundColor: "rgba(15,23,42,0.9)",
-                      borderRadius: "0.6rem",
-                      border: "1px solid rgba(148,163,184,0.6)",
-                      padding: "0.45rem 0.6rem",
-                      color: "#e5e7eb",
-                      fontSize: "0.85rem",
-                      outline: "none",
-                    }}
                     placeholder="ECE, CSE, etc."
+                    className="mt-1 w-full rounded-lg border border-zinc-700 bg-black/80 px-3 py-2 text-xs text-slate-100 outline-none focus:border-zinc-400"
                   />
                 </label>
               </div>
-              <div style={{ display: "flex", gap: "1rem" }}>
-                <div>
-                  <label style={{ fontSize: "0.8rem" }}>
+
+              <div className="flex flex-wrap gap-4">
+                <div className="space-y-1">
+                  <label className="text-[11px] text-zinc-400">
                     Start Year
                     <input
                       type="number"
                       value={profile.education?.startYear || ""}
                       onChange={handleEducationChange("startYear")}
                       disabled={!isEditing}
-                      style={{
-                        width: "110px",
-                        marginTop: "0.15rem",
-                        backgroundColor: "rgba(15,23,42,0.9)",
-                        borderRadius: "0.6rem",
-                        border: fieldErrors.startYear
-                          ? "1px solid #f97373"
-                          : "1px solid rgba(148,163,184,0.6)",
-                        padding: "0.45rem 0.6rem",
-                        color: "#e5e7eb",
-                        fontSize: "0.85rem",
-                        outline: "none",
-                      }}
+                      className={`mt-1 w-28 rounded-lg border bg-black/80 px-3 py-2 text-xs text-slate-100 outline-none ${
+                        fieldErrors.startYear
+                          ? "border-red-500/70"
+                          : "border-zinc-700 focus:border-zinc-400"
+                      }`}
                     />
-                    {fieldErrors.startYear && (
-                      <p
-                        style={{
-                          color: "#f97373",
-                          fontSize: "0.75rem",
-                          marginTop: "0.1rem",
-                        }}
-                      >
-                        {fieldErrors.startYear}
-                      </p>
-                    )}
                   </label>
+                  {fieldErrors.startYear && (
+                    <p className="text-[11px] text-red-400">
+                      {fieldErrors.startYear}
+                    </p>
+                  )}
                 </div>
-                <div>
-                  <label style={{ fontSize: "0.8rem" }}>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] text-zinc-400">
                     End Year
                     <input
                       type="number"
                       value={profile.education?.endYear || ""}
                       onChange={handleEducationChange("endYear")}
                       disabled={!isEditing}
-                      style={{
-                        width: "110px",
-                        marginTop: "0.15rem",
-                        backgroundColor: "rgba(15,23,42,0.9)",
-                        borderRadius: "0.6rem",
-                        border: fieldErrors.endYear
-                          ? "1px solid #f97373"
-                          : "1px solid rgba(148,163,184,0.6)",
-                        padding: "0.45rem 0.6rem",
-                        color: "#e5e7eb",
-                        fontSize: "0.85rem",
-                        outline: "none",
-                      }}
+                      className={`mt-1 w-28 rounded-lg border bg-black/80 px-3 py-2 text-xs text-slate-100 outline-none ${
+                        fieldErrors.endYear
+                          ? "border-red-500/70"
+                          : "border-zinc-700 focus:border-zinc-400"
+                      }`}
                     />
-                    {fieldErrors.endYear && (
-                      <p
-                        style={{
-                          color: "#f97373",
-                          fontSize: "0.75rem",
-                          marginTop: "0.1rem",
-                        }}
-                      >
-                        {fieldErrors.endYear}
-                      </p>
-                    )}
                   </label>
+                  {fieldErrors.endYear && (
+                    <p className="text-[11px] text-red-400">
+                      {fieldErrors.endYear}
+                    </p>
+                  )}
                 </div>
               </div>
             </section>
 
+            {/* Social links inputs */}
+            <section className="space-y-2">
+              <h2 className="text-sm font-semibold">Social Links</h2>
+              <div className="space-y-2">
+                <label className="text-[11px] text-zinc-400">
+                  LinkedIn
+                  <input
+                    type="text"
+                    value={profile.socialLinks?.linkedin || ""}
+                    onChange={handleSocialChange("linkedin")}
+                    disabled={!isEditing}
+                    placeholder="https://linkedin.com/in/username"
+                    className={`mt-1 w-full rounded-lg border bg-black/80 px-3 py-2 text-xs text-slate-100 outline-none ${
+                      fieldErrors.linkedin
+                        ? "border-red-500/70"
+                        : "border-zinc-700 focus:border-zinc-400"
+                    }`}
+                  />
+                </label>
+                {fieldErrors.linkedin && (
+                  <p className="text-[11px] text-red-400">
+                    {fieldErrors.linkedin}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[11px] text-zinc-400">
+                  GitHub
+                  <input
+                    type="text"
+                    value={profile.socialLinks?.github || ""}
+                    onChange={handleSocialChange("github")}
+                    disabled={!isEditing}
+                    placeholder="https://github.com/username"
+                    className={`mt-1 w-full rounded-lg border bg-black/80 px-3 py-2 text-xs text-slate-100 outline-none ${
+                      fieldErrors.github
+                        ? "border-red-500/70"
+                        : "border-zinc-700 focus:border-zinc-400"
+                    }`}
+                  />
+                </label>
+                {fieldErrors.github && (
+                  <p className="text-[11px] text-red-400">
+                    {fieldErrors.github}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[11px] text-zinc-400">
+                  Portfolio
+                  <input
+                    type="text"
+                    value={profile.socialLinks?.portfolio || ""}
+                    onChange={handleSocialChange("portfolio")}
+                    disabled={!isEditing}
+                    placeholder="https://your-portfolio.com"
+                    className={`mt-1 w-full rounded-lg border bg-black/80 px-3 py-2 text-xs text-slate-100 outline-none ${
+                      fieldErrors.portfolio
+                        ? "border-red-500/70"
+                        : "border-zinc-700 focus:border-zinc-400"
+                    }`}
+                  />
+                </label>
+                {fieldErrors.portfolio && (
+                  <p className="text-[11px] text-red-400">
+                    {fieldErrors.portfolio}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[11px] text-zinc-400">
+                  X (Twitter)
+                  <input
+                    type="text"
+                    value={profile.socialLinks?.x || ""}
+                    onChange={handleSocialChange("x")}
+                    disabled={!isEditing}
+                    placeholder="https://x.com/username"
+                    className={`mt-1 w-full rounded-lg border bg-black/80 px-3 py-2 text-xs text-slate-100 outline-none ${
+                      fieldErrors.x
+                        ? "border-red-500/70"
+                        : "border-zinc-700 focus:border-zinc-400"
+                    }`}
+                  />
+                </label>
+                {fieldErrors.x && (
+                  <p className="text-[11px] text-red-400">{fieldErrors.x}</p>
+                )}
+              </div>
+            </section>
+
             {/* Actions */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "0.75rem",
-                marginTop: "0.5rem",
-              }}
-            >
+            <div className="flex justify-end gap-3 pt-2">
               {!isEditing && (
                 <button
                   type="button"
                   onClick={() => setIsEditing(true)}
-                  style={{
-                    borderRadius: "999px",
-                    border: "1px solid rgba(148,163,184,0.8)",
-                    padding: "0.45rem 0.9rem",
-                    fontSize: "0.85rem",
-                    fontWeight: 500,
-                    backgroundColor: "transparent",
-                    color: "#e5e7eb",
-                    cursor: "pointer",
-                  }}
+                  className="rounded-full border border-zinc-600 px-4 py-2 text-xs font-medium text-slate-100 hover:bg-zinc-900"
                 >
                   Edit Profile
                 </button>
@@ -723,33 +619,14 @@ const StudentProfilePage: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleCancel}
-                    style={{
-                      borderRadius: "999px",
-                      border: "none",
-                      padding: "0.45rem 0.9rem",
-                      fontSize: "0.85rem",
-                      fontWeight: 500,
-                      backgroundColor: "rgba(15,23,42,0.9)",
-                      color: "#9ca3af",
-                      cursor: "pointer",
-                    }}
+                    className="rounded-full bg-zinc-900 px-4 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={saving}
-                    style={{
-                      borderRadius: "999px",
-                      border: "none",
-                      padding: "0.45rem 1.1rem",
-                      fontSize: "0.85rem",
-                      fontWeight: 600,
-                      cursor: saving ? "wait" : "pointer",
-                      background:
-                        "linear-gradient(135deg, #22c55e, #16a34a, #0ea5e9)",
-                      color: "#0f172a",
-                    }}
+                    className="rounded-full bg-linear-to-r from-emerald-500 via-green-500 to-sky-500 px-5 py-2 text-xs font-semibold text-slate-900 disabled:cursor-wait disabled:opacity-80"
                   >
                     {saving ? "Saving..." : "Save Changes"}
                   </button>
@@ -758,66 +635,21 @@ const StudentProfilePage: React.FC = () => {
             </div>
 
             {error && (
-              <p
-                style={{
-                  marginTop: "0.5rem",
-                  color: "#f97373",
-                  fontSize: "0.8rem",
-                }}
-              >
-                {error}
-              </p>
+              <p className="pt-1 text-[11px] text-red-400">{error}</p>
             )}
           </form>
 
           {/* Right: Profile preview & visibility */}
-          <aside
-            style={{
-              borderRadius: "1rem",
-              background:
-                "radial-gradient(circle at top, rgba(15,118,110,0.25), rgba(15,23,42,0.95))",
-              border: "1px solid rgba(148,163,184,0.4)",
-              padding: "1rem",
-              display: "flex",
-              flexDirection: "column",
-              gap: "1rem",
-            }}
-          >
+          <aside className="flex flex-col gap-4 rounded-2xl border border-emerald-500/20 bg-linear-to-b from-teal-900/30 via-slate-950 to-black px-4 py-4">
             {/* Avatar + basic info */}
-            <div
-              style={{
-                display: "flex",
-                gap: "0.75rem",
-                alignItems: "center",
-              }}
-            >
-              <div
-                style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: "999px",
-                  border: "2px solid rgba(94,234,212,0.75)",
-                  overflow: "hidden",
-                  background:
-                    "radial-gradient(circle at top, #22c55e, #0f172a)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 600,
-                  fontSize: "1.4rem",
-                  color: "#022c22",
-                }}
-              >
+            <div className="flex items-center gap-3">
+              <div className="h-16 w-16 rounded-full border-2 border-emerald-300/70 bg-linear-to-b from-emerald-400 to-slate-900 flex items-center justify-center text-lg font-semibold text-emerald-950 overflow-hidden">
                 {profile.profilePhotoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={profile.profilePhotoUrl}
                     alt="Profile"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
+                    className="h-full w-full object-cover"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = "none";
                     }}
@@ -827,48 +659,33 @@ const StudentProfilePage: React.FC = () => {
                 )}
               </div>
               <div>
-                <div style={{ fontSize: "1rem", fontWeight: 600 }}>
+                <p className="text-sm font-semibold">
                   {name || "Unnamed Student"}
-                </div>
-                <div style={{ fontSize: "0.8rem", color: "#9ca3af" }}>
-                  {email}
-                </div>
-                <div
-                  style={{
-                    fontSize: "0.75rem",
-                    marginTop: "0.35rem",
-                    color:
-                      profile.visibility === "PUBLIC"
-                        ? "#4ade80"
-                        : "#f97373",
-                  }}
+                </p>
+                <p className="text-[11px] text-zinc-400">{email}</p>
+                <p
+                  className={`mt-1 text-[11px] ${
+                    profile.visibility === "PUBLIC"
+                      ? "text-emerald-400"
+                      : "text-red-400"
+                  }`}
                 >
                   {profile.visibility === "PUBLIC"
                     ? "Visible to mentors & recruiters"
                     : "Profile is private"}
-                </div>
+                </p>
               </div>
             </div>
 
             {/* Visibility control */}
-            <div>
-              <label style={{ fontSize: "0.8rem" }}>
+            <div className="space-y-1">
+              <label className="text-[11px] text-zinc-400">
                 Profile Visibility
                 <select
                   value={profile.visibility}
                   onChange={handleVisibilityChange}
                   disabled={!isEditing}
-                  style={{
-                    width: "100%",
-                    marginTop: "0.35rem",
-                    backgroundColor: "rgba(15,23,42,0.9)",
-                    borderRadius: "0.6rem",
-                    border: "1px solid rgba(148,163,184,0.7)",
-                    padding: "0.45rem 0.6rem",
-                    color: "#e5e7eb",
-                    fontSize: "0.85rem",
-                    outline: "none",
-                  }}
+                  className="mt-1 w-full rounded-lg border border-zinc-700 bg-black/80 px-3 py-2 text-xs text-slate-100 outline-none focus:border-zinc-400"
                 >
                   <option value="PUBLIC">
                     Public (recommended for mentorship)
@@ -879,46 +696,26 @@ const StudentProfilePage: React.FC = () => {
             </div>
 
             {/* Social links preview */}
-            <div>
-              <h3
-                style={{
-                  fontSize: "0.9rem",
-                  fontWeight: 600,
-                  marginBottom: "0.3rem",
-                }}
-              >
-                Social Links
-              </h3>
-              <div style={{ fontSize: "0.8rem", color: "#9ca3af" }}>
+            <div className="space-y-1">
+              <h3 className="text-xs font-semibold">Social Links Preview</h3>
+              <div className="space-y-1 text-[11px] text-zinc-400">
                 <p>
-                  LinkedIn:{" "}
-                  {profile.socialLinks?.linkedin
-                    ? profile.socialLinks.linkedin
-                    : "Not added"}
+                  <span className="text-zinc-300">LinkedIn:</span>{" "}
+                  {profile.socialLinks?.linkedin || "Not added"}
                 </p>
                 <p>
-                  GitHub:{" "}
-                  {profile.socialLinks?.github
-                    ? profile.socialLinks.github
-                    : "Not added"}
+                  <span className="text-zinc-300">GitHub:</span>{" "}
+                  {profile.socialLinks?.github || "Not added"}
                 </p>
                 <p>
-                  Portfolio:{" "}
-                  {profile.socialLinks?.portfolio
-                    ? profile.socialLinks.portfolio
-                    : "Not added"}
+                  <span className="text-zinc-300">Portfolio:</span>{" "}
+                  {profile.socialLinks?.portfolio || "Not added"}
                 </p>
               </div>
             </div>
 
-            {/* Small note */}
-            <p
-              style={{
-                fontSize: "0.75rem",
-                color: "#9ca3af",
-                marginTop: "auto",
-              }}
-            >
+            {/* Tip */}
+            <p className="mt-auto text-[11px] text-zinc-500">
               Tip: keep your skills, links, and education updated — mentors use
               this to decide who to assign real-world tasks to.
             </p>
