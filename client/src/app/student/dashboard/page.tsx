@@ -1,10 +1,39 @@
 "use client";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { meApi, logoutApi, type User } from "@/api/auth";
+
+type TaskCategory = "ACTIVE" | "PENDING" | "APPROVED" | "OTHER";
+
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  category: TaskCategory;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  type: string; // e.g. "demo", "web", etc.
+  teamSize: number;
+  dueDate: string; // display string for now
+  createdAt: string; // display string
+  removed?: boolean;
+}
+
+const mockTasks: Task[] = [
+  {
+    id: "1",
+    title: "demom",
+    description: "demo",
+    category: "OTHER",
+    difficulty: "MEDIUM",
+    type: "demo",
+    teamSize: 2,
+    dueDate: "10/2/2026",
+    createdAt: "8/12/2025",
+    removed: true,
+  },
+  // you can add more mock tasks later or wire to backend
+];
 
 function StudentDashboardInner() {
   const [user, setUser] = useState<User | null>(null);
@@ -22,10 +51,9 @@ function StudentDashboardInner() {
   const handleLogout = async () => {
     try {
       await logoutApi();
-      // if you also use localStorage token anywhere:
       localStorage.removeItem("token");
-    } catch (e) {
-      // ignore errors for now
+    } catch {
+      // ignore for now
     } finally {
       window.location.href = "/auth";
     }
@@ -33,23 +61,26 @@ function StudentDashboardInner() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 text-slate-200">
+      <div className="min-h-screen flex items-center justify-center bg-black text-slate-200">
         <p className="text-sm">Loading your space…</p>
       </div>
     );
   }
 
+  const activeTasks = mockTasks.filter((t) => t.category === "ACTIVE");
+  const pendingTasks = mockTasks.filter((t) => t.category === "PENDING");
+  const approvedTasks = mockTasks.filter((t) => t.category === "APPROVED");
+  const otherTasks = mockTasks.filter((t) => t.category === "OTHER");
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 text-slate-100">
+    <div className="min-h-screen bg-[#02040a] text-slate-100">
       {/* Top Bar */}
-      <header className="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <header className="border-b border-zinc-800 bg-black/80 backdrop-blur sticky top-0 z-20">
+        <div className="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight">
-              🎓 Student Hub
-            </h1>
-            <p className="text-xs text-slate-400">
-              Obsidian Circle – Your mentorship workspace
+            <h1 className="text-xl font-semibold tracking-tight">🎓 Student Hub</h1>
+            <p className="text-xs text-zinc-400">
+              View and manage the tasks assigned to you.
             </p>
           </div>
 
@@ -63,7 +94,7 @@ function StudentDashboardInner() {
               </div>
               <button
                 onClick={handleLogout}
-                className="px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800 hover:bg-slate-700 border border-slate-700 transition"
+                className="px-3 py-1.5 rounded-full text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 transition"
               >
                 Logout
               </button>
@@ -72,49 +103,49 @@ function StudentDashboardInner() {
         </div>
       </header>
 
-      {/* Content */}
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        {/* Hero card */}
-        <section className="bg-slate-900/70 border border-slate-800 rounded-2xl p-6 shadow-xl shadow-black/40 flex flex-col md:flex-row justify-between gap-4">
-          <div>
-            <p className="text-sm text-slate-400 mb-1">Welcome back,</p>
-            <h2 className="text-2xl md:text-3xl font-semibold">
-              {user?.name ?? "Student"} 👋
-            </h2>
-            <p className="text-sm text-slate-400 mt-2 max-w-xl">
-              Track your tasks, manage your teams, and build a portfolio that
-              mentors can genuinely vouch for.
-            </p>
-          </div>
-          <div className="flex flex-col items-end justify-between text-right">
-            <p className="text-xs text-slate-400 uppercase tracking-[0.18em]">
-              CURRENT STATUS
-            </p>
-            <p className="text-sm font-medium text-emerald-400">
-              Active learner
-            </p>
-          </div>
-        </section>
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto px-5 py-8 space-y-6">
+        {/* Page heading like screenshot */}
+        <div className="space-y-1">
+          <h2 className="text-2xl font-semibold tracking-tight">My Tasks</h2>
+          <p className="text-sm text-zinc-400">
+            View, manage, and remove tasks you&apos;ve created.
+          </p>
+        </div>
 
-        {/* Quick navigation cards */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <DashboardCard
-            title="My Profile"
-            description="Update your bio, skills, and social links mentors see."
-            href="/student/profile"
-            accent="from-emerald-500/20 to-emerald-500/5"
+        {/* 2x2 grid of status cards */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Active */}
+          <StatusCard
+            title="Active"
+            dotColor="bg-blue-500"
+            tasks={activeTasks}
+            emptyText="No tasks here yet."
           />
-          <DashboardCard
-            title="My Tasks"
-            description="View tasks assigned to you and your team."
-            href="/student/tasks"
-            accent="from-blue-500/20 to-blue-500/5"
+
+          {/* Pending */}
+          <StatusCard
+            title="Pending"
+            dotColor="bg-amber-400"
+            tasks={pendingTasks}
+            emptyText="No tasks here yet."
           />
-          <DashboardCard
-            title="My Teams"
-            description="Create or join teams and manage collaboration."
-            href="/student/teams"
-            accent="from-purple-500/20 to-purple-500/5"
+
+          {/* Approved */}
+          <StatusCard
+            title="Approved"
+            dotColor="bg-emerald-400"
+            tasks={approvedTasks}
+            emptyText="No tasks here yet."
+          />
+
+          {/* Other */}
+          <StatusCard
+            title="Other"
+            dotColor="bg-zinc-500"
+            tasks={otherTasks}
+            emptyText="No tasks here yet."
+            highlightOther
           />
         </section>
       </main>
@@ -122,44 +153,112 @@ function StudentDashboardInner() {
   );
 }
 
-function DashboardCard({
+/**
+ * Card for each status column
+ */
+function StatusCard({
   title,
-  description,
-  href,
-  accent,
+  dotColor,
+  tasks,
+  emptyText,
+  highlightOther = false,
 }: {
   title: string;
-  description: string;
-  href: string;
-  accent: string;
+  dotColor: string;
+  tasks: Task[];
+  emptyText: string;
+  highlightOther?: boolean;
 }) {
+  const countLabel = `${tasks.length} task${tasks.length === 1 ? "" : "s"}`;
+
   return (
-    <Link
-      href={href}
-      className={`group relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-lg shadow-black/40 hover:shadow-xl hover:shadow-black/60 transition transform hover:-translate-y-1`}
-    >
-      <div
-        className={`pointer-events-none absolute inset-0 bg-linear-to-br ${accent} opacity-0 group-hover:opacity-100 transition`}
-      />
-      <div className="relative space-y-2">
-        <h3 className="text-lg font-semibold">{title}</h3>
-        <p className="text-xs text-slate-400">{description}</p>
-        <span className="inline-flex items-center text-xs font-medium text-emerald-400 group-hover:text-emerald-300">
-          Open
-          <span className="ml-1 group-hover:translate-x-0.5 transition">
-            →
-          </span>
-        </span>
+    <div className="rounded-2xl border border-zinc-800 bg-[#050509] px-5 py-4 shadow-[0_0_0_1px_rgba(24,24,27,0.6)]">
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold">{title}</p>
+          <span className={`w-2.5 h-2.5 rounded-full ${dotColor}`} />
+        </div>
+        <p className="text-xs text-zinc-400">{countLabel}</p>
       </div>
-    </Link>
+
+      {/* Body */}
+      {tasks.length === 0 ? (
+        <p className="flex items-center gap-2 text-xs text-zinc-500">
+          <span className={`w-2.5 h-2.5 rounded-full border border-zinc-600`} />
+          {emptyText}
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {tasks.map((task) => (
+            <TaskRow key={task.id} task={task} highlightOther={highlightOther} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Single task row (used in "Other" to match screenshot)
+ */
+function TaskRow({ task, highlightOther }: { task: Task; highlightOther: boolean }) {
+  return (
+    <div
+      className={`rounded-xl border ${
+        highlightOther
+          ? "border-zinc-800 bg-zinc-950"
+          : "border-zinc-800 bg-zinc-900/60"
+      } px-4 py-3 flex flex-col gap-1.5 text-xs`}
+    >
+      {/* Title + removed pill + trash icon */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold text-zinc-50">{task.title}</p>
+          {task.removed && (
+            <span className="px-2 py-0.5 rounded-full border border-zinc-700 text-[10px] uppercase tracking-[0.16em] text-zinc-300">
+              Removed
+            </span>
+          )}
+        </div>
+        {task.removed && (
+          <div className="flex items-center gap-1 text-[11px] text-red-400">
+            {/* simple trash icon */}
+            <span className="inline-flex items-center justify-center rounded-full border border-red-500/50 px-1.5 py-0.5">
+              🗑
+            </span>
+            <span className="hidden sm:inline">Removed</span>
+          </div>
+        )}
+      </div>
+
+      {/* Description */}
+      <p className="text-[11px] text-zinc-400">{task.description}</p>
+
+      {/* Meta row: difficulty / type / team / due */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-zinc-500 mt-1">
+        <span className="uppercase tracking-[0.16em]">
+          {task.difficulty}
+        </span>
+        <span>{task.type}</span>
+        <span>Team: {task.teamSize}</span>
+        <span>Due: {task.dueDate}</span>
+      </div>
+
+      {/* Created at */}
+      <div className="mt-2 flex items-center gap-1 text-[11px] text-zinc-500">
+        <span>⏲</span>
+        <span>Created {task.createdAt}</span>
+      </div>
+    </div>
   );
 }
 
 // ✅ Export wrapped with role-based guard
 export default function StudentDashboard() {
-    return (
-      <ProtectedRoute allowedRoles={["STUDENT"]}>
-        <StudentDashboardInner />
-      </ProtectedRoute>
-    );
-  }
+  return (
+    <ProtectedRoute allowedRoles={["STUDENT"]}>
+      <StudentDashboardInner />
+    </ProtectedRoute>
+  );
+}
