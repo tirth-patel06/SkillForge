@@ -24,7 +24,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     (async () => {
       try {
         const res = await meApi();
-        setUser(res.data.user);
+        setUser(res);
+        console.log("meApi user:", res);
       } catch {
         setUser(null);
       } finally {
