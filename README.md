@@ -1,36 +1,96 @@
 🚀 Hustle Haveli – Project Structure
 
+Team Members :
+1. Anushka Gupta - 20244032
+2. Aditya Kanodia - 20244012
+3. Tirth Patel - 20244125
+4. Shreya Saxena - 20244153
+
 This repository contains the initial setup for the Hustle Haveli project, including both the frontend (client) and backend (server) environments.
 
-📁 Folder Structure
-hustle-haveli/
+## 📁 Folder Structure
+
+```
+HUSTLE-HAVELI/
 │
-├── client/          # Frontend (Next.js + TypeScript)
+├── client/
+│   ├── .next/
+│   ├── node_modules/
 │   ├── public/
 │   ├── src/
-│   │   ├── app/     # App Router pages
+│   │   ├── api/
+│   │   │   └── auth.ts
+│   │   ├── app/
+│   │   │   ├── auth/
+│   │   │   │   └── page.tsx
+│   │   │   ├── dashboard/
+│   │   │   │   └── page.tsx
+│   │   │   ├── github-callback/
+│   │   │   │   └── page.tsx
+│   │   │   ├── globals.css
+│   │   │   ├── layout.tsx
+│   │   │   └── page.tsx
+│   │   ├── providers.tsx
 │   │   ├── components/
-│   │   ├── utils/
-│   │   └── types/
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── GuestRoute.tsx
+│   │   │   └── ProtectedRoute.tsx
+│   │   ├── context/
+│   │   │   └── AuthContext.tsx
+│   │   └── pages/
+│   │       ├── AuthPage.tsx
+│   │       └── GithubCallback.tsx
+│   ├── .env
+│   ├── .gitignore
+│   ├── eslint.config.mjs
+│   ├── next-env.d.ts
+│   ├── next.config.ts
 │   ├── package.json
-│   └── tsconfig.json
+│   ├── package-lock.json
+│   ├── postcss.config.mjs
+│   └── README.md
 │
-├── server/          # Backend (Express + TypeScript)
+├── server/
+│   ├── node_modules/
 │   ├── src/
 │   │   ├── config/
+│   │   │   ├── db.ts
+│   │   │   └── passportGithub.ts
 │   │   ├── controllers/
-│   │   ├── middlewares/
+│   │   │   ├── authController.ts
+│   │   │   ├── mentorController.ts
+│   │   │   └── taskController.ts
+│   │   ├── lib/
+│   │   │   ├── mongoose.ts
+│   │   │   └── sendEmail.ts
+│   │   ├── middleware/
+│   │   │   ├── auth.ts
+│   │   │   └── requireMentor.ts
 │   │   ├── models/
+│   │   │   ├── MentorSystem.ts
+│   │   │   ├── Referral.ts
+│   │   │   ├── Task.ts
+│   │   │   └── User.ts
 │   │   ├── routes/
-│   │   ├── services/
-│   │   ├── utils/
+│   │   │   ├── authRoutes.ts
+│   │   │   └── mentorRoutes.ts
 │   │   ├── types/
-│   │   ├── app.ts     # Express application setup
-│   │   └── server.ts  # Server entry file
+│   │   │   ├── auth.ts
+│   │   │   ├── app.ts
+│   │   │   └── server.ts
+│   │   └── server.ts
+│   ├── .env
 │   ├── package.json
-│   └── tsconfig.json
+│   ├── package-lock.json
+│   ├── tsconfig.json
+│   ├── .gitignore
+│   └── README.md
 │
-└── docs/             # Documentation folder (empty for now)
+├── package.json
+├── README.md
+└── .gitignore
+```
+
 
 🛠️ Tech Stack
 Frontend (client/)

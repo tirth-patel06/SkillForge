@@ -1,9 +1,12 @@
 import { Router } from "express";
 import { getMyProfile, updateMyProfile, getPublicProfile } from "../controllers/studentProfileController";
+import { getStudents } from "../controllers/studentController";
 import { requireStudent } from "../middleware/requireStudent";
-import { requireAuth } from "../middleware/authMiddleware";
+import { requireAuth } from "../middleware/auth";
 
 const router = Router();
+
+router.get("/", getStudents);
 
 // GET /api/students/me/profile
 router.get("/me/profile", requireAuth, requireStudent, getMyProfile);
