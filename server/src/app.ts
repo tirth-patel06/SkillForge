@@ -14,7 +14,7 @@ import studentRoutes from "./routes/studentRoutes";
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:3000"];
+const allowedOrigins = ["http://localhost:3000","http://localhost:3001","http://localhost:3002","http://localhost:3003"];
 
 app.use(
   cors({

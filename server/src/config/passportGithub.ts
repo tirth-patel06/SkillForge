@@ -1,9 +1,17 @@
 // server/src/config/passportGithub.ts
-import passport from "passport";
-import { Strategy as GitHubStrategy } from "passport-github2";
-import { User } from "../models/User";
 
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID!;
+import passport from "passport";
+// Remove or comment out GitHub import temporarily
+// import { Strategy as GitHubStrategy } from "passport-github2";
+import { User } from "../models/User";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+console.log("⚠️ GitHub auth temporarily disabled for development");
+
+
+`const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID!;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET!;
 const GITHUB_CALLBACK_URL =
   process.env.GITHUB_CALLBACK_URL ||
@@ -52,5 +60,5 @@ passport.use(
     }
   )
 );
-
+`
 export default passport;

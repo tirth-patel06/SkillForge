@@ -2,7 +2,7 @@ import app from "./app";
 import mongoose from "mongoose";
 const connectedDb=async()=>{
     try {
-    await mongoose.connect("mongodb+srv://admin:aditya123@cluster0.pbdlbep.mongodb.net/hustleHaveli")
+    await mongoose.connect("mongodb+srv://admin:aditya123@cluster0.pbdlbep.mongodb.net/hustleHaveli2")
    const connection=mongoose.connection
    connection.on('connected',()=>{console.log("connection successfull")})
    connection.on('error',()=>{console.log("connection failed some error")
