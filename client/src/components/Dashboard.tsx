@@ -84,7 +84,7 @@ export function Dashboard() {
           color="from-blue-500 to-cyan-500"
         />
         <StatCard
-          title="Teams Needing Attention"
+          title="Needing Attention"
           value={stats.teamsNeedingAttention}
           subtitle="require follow-up"
           icon={AlertCircle}
