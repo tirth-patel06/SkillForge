@@ -8,4 +8,13 @@ export async function createReferralPdf(referralData: {
   reason: string;
   evidence: string[];
   token: string;
-})
+}): Promise<string> {
+  const publicDir = path.join(__dirname, "../../public");
+  const outDir = path.join(publicDir, "referrals");
+
+  if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir);
+  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
+
+  const filename = `referral_${Date.now()}.pdf`;
+  const filePath = path.join(outDir, filename);
+
