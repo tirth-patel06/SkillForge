@@ -14,6 +14,19 @@ const roleLabels: Record<Role, string> = {
   ADMIN: "Professor",
 };
 
+function getDashboardRoute(role: Role): string {
+  switch (role) {
+    case "STUDENT":
+      return "/student/dashboard";
+    case "MENTOR":
+      return "/mentor/dashboard";
+    case "ADMIN":
+      return "/admin/dashboard";
+    default:
+      return "/dashboard";
+  }
+}
+
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [role, setRole] = useState<Role>("STUDENT");
@@ -30,13 +43,20 @@ export default function AuthPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const githubUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/auth/github`;
+  const githubUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/auth/github`;
 
   const handleInput =
     (field: "name" | "email" | "password") =>
     (e: ChangeEvent<HTMLInputElement>) => {
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
     };
+
+    // 🔹 Centralized redirect based on role
+  const redirectToRoleDashboard = (roleFromBackend?: Role | null) => {
+    const finalRole = roleFromBackend || role; // fallback to selected role if backend role not returned
+    const target = getDashboardRoute(finalRole);
+    window.location.href = target;
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -55,13 +75,17 @@ export default function AuthPage() {
         setOtpStep(true);
         setMessage("OTP sent to your email. Please verify.");
       } else {
-        await loginApi({
+        const res = await loginApi({
           email: form.email,
           password: form.password,
           role,
         });
+
+        const userRole: Role | undefined = res?.data?.user?.role;
+
         setMessage("Login successful! Redirecting…");
-        window.location.href = "/dashboard";
+        // window.location.href = "/dashboard";
+        redirectToRoleDashboard(userRole);
       }
     } catch (err: any) {
       setError(err?.response?.data?.message || "Something went wrong.");
@@ -77,9 +101,14 @@ export default function AuthPage() {
     setLoading(true);
 
     try {
-      await verifyEmailApi({ email: form.email, otp });
+      // 🔹 After OTP verification, you can also have backend return user+token
+      const res = await verifyEmailApi({ email: form.email, otp });
+
+      // If API returns role, use it; else fallback to selected role
+      const userRole: Role | undefined = res?.data?.user?.role;
       alert("Verified successfully ✅");
-      window.location.href = "/dashboard";
+      // window.location.href = "/dashboard";
+      redirectToRoleDashboard(userRole);
     } catch (err: any) {
       setError(err?.response?.data?.message || "Invalid or expired OTP");
     } finally {

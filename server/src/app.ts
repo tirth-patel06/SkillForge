@@ -6,21 +6,28 @@ import cookieParser from "cookie-parser";
 
 // Route imports
 import authRoutes from "./routes/authRoutes";
+import studentRoutes from "./routes/studentRoutes";
 // import mentorRoutes from "./routes/mentorRoutes.ts";
 // import taskRoutes from "./routes/taskRoutes";
 // import submissionRoutes from "./routes/submissionRoutes";
 // import referralRoutes from "./routes/referralRoutes";
 // import studentRoutes from "./routes/studentRoutes";
+// import authRoutes from "./routes/authRoutes";
 
 const app = express();
 
-// Middlewares
+const allowedOrigins = ["http://localhost:3000"];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000", // Next.js
+    origin: true,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
@@ -30,13 +37,12 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-// Backend APIs
+// app.use("/api/mentor", mentorRoutes);           
+// app.use("/api/tasks", taskRoutes);              
+// app.use("/api/submissions", submissionRoutes); 
+// app.use("/api/referrals", referralRoutes);     
+app.use("/api/students", studentRoutes);        
 app.use("/api/auth", authRoutes);
-// app.use("/api/mentor", mentorRoutes);
-// app.use("/api/tasks", taskRoutes);
-// app.use("/api/submissions", submissionRoutes);
-// app.use("/api/referrals", referralRoutes);
-// app.use("/api/students", studentRoutes);
 
 // 404 Handler
 app.use((_req, res) => {
