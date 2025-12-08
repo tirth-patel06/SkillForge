@@ -5,6 +5,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import path from "path";
 // Route imports
+import { configDotenv } from "dotenv";
 import authRoutes from './routes/authRoutes'
 import studentRoutes from "./routes/studentRoutes";
 import adminReferralRoutes from './controllers/adminReferralApproval'
@@ -13,6 +14,9 @@ import adminReferralRoutes from './controllers/adminReferralApproval'
  ////import submissionRoutes from "./routes/submissionRoutes";
 //import referralRoutes from "./routes/referralRoutes";
 import adminTaskRoutes from './controllers/adminTaskApprove'
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 

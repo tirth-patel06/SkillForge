@@ -1,7 +1,7 @@
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
-import { cloudinary } from "../config/cloudinary";
+import cloudinary from "../config/cloudinary";
 export async function createReferralPdf(referralData: {
   mentorEmail: string;
   studentEmail: string;
