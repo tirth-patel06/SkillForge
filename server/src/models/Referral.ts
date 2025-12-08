@@ -13,6 +13,8 @@ export interface IReferral extends Document {
   recommendation: string;
   evidenceLinks: string[];
   status: ReferralStatus;
+  signedToken?: string;//signed token for pdf(figure out)
+  pdfUrl?: string;//signed pdf to be sent recuiter
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,7 +36,8 @@ const ReferralSchema = new Schema<IReferral>(
     recommendation: { type: String, required: true },
 
     evidenceLinks: { type: [String], default: [] },
-
+     signedToken:String,//signed token for pdf(figure out)
+  pdfUrl:String,//signed pdf to be sent recuiter
     status: {
       type: String,
       enum: ["PENDING", "ACCEPTED", "REJECTED", "APPROVED", "REMOVED"],
