@@ -6,6 +6,8 @@ import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
+router.get("/", getStudents);
+
 // GET /api/students/me/profile
 router.get("/me/profile", requireAuth, requireStudent, getMyProfile);
 
