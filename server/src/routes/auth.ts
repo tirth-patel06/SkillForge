@@ -27,3 +27,4 @@ router.post("/login",async(req,res)=>{
 })
 //standard login using jwt creating token with info
 ///DEMO LOGIN
+export default router;
