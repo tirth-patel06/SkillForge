@@ -214,7 +214,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
                   className="w-8 h-8 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-xs font-semibold">
+                <div className="w-8 h-8 rounded-full bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center text-xs font-semibold">
                   {comment.authorName
                     .split(" ")
                     .map((n) => n[0])

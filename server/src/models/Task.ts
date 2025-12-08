@@ -38,7 +38,7 @@ const TaskSchema = new Schema<ITask>({
   status: {
     type: String,
     enum: ["PENDING", "ACTIVE", "APPROVED", "REJECTED", "REMOVED"],
-    default: "PENDING",
+    default: "ACTIVE",
   },
   modNotes: String,
   resolvedAt: Date,

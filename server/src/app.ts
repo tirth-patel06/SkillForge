@@ -12,6 +12,7 @@ import taskRoutes from "./routes/taskRoutes";
 import submissionRoutes from "./routes/submissionRoutes";
 import referralRoutes from "./routes/referralRoutes";
 import commentRoutes from "./routes/commentRoutes";
+import studentTaskRoutes from "./routes/studentTaskRoutes";
 
 const app = express();
 
@@ -38,7 +39,8 @@ app.get("/api/health", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/mentors", mentorRoutes);           
-app.use("/api/students", studentRoutes);        
+app.use("/api/students", studentRoutes); 
+app.use("/api/students/tasks", studentTaskRoutes);       
 app.use("/api/tasks", taskRoutes);              
 app.use("/api/submissions", submissionRoutes); 
 app.use("/api/referrals", referralRoutes);     
