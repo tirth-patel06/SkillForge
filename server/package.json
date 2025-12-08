@@ -24,7 +24,8 @@
     "nodemailer": "^7.0.11",
     "nodemon": "^3.1.11",
     "passport": "^0.7.0",
-    "passport-github2": "^0.1.12"
+    "passport-github2": "^0.1.12",
+    "pdfkit": "^0.17.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -38,6 +39,7 @@
     "@types/nodemailer": "^7.0.4",
     "@types/passport": "^1.0.17",
     "@types/passport-github2": "^1.2.9",
+    "@types/pdfkit": "^0.17.4",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
     "eslint": "^9.39.1",

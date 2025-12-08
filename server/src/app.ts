@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-
+import path from "path";
 // Route imports
 import authRoutes from './routes/authRoutes'
 import studentRoutes from "./routes/studentRoutes";
@@ -26,7 +26,7 @@ app.use(
   })
 );
 
-
+app.use(express.static(path.join(__dirname, "../public")));
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
