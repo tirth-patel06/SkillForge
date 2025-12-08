@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import { Loader2, Trash2, Clock, AlertCircle, Circle } from "lucide-react";
+import { TaskDetailPage } from "@/components/TaskDetailPage";
 
 export type TaskStatus = "PENDING" | "ACTIVE" | "APPROVED" | "REJECTED" | "REMOVED";
 
@@ -48,6 +49,7 @@ export function MyTasks() {
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const grouped = useMemo(() => groupTasks(tasks), [tasks]);
 
@@ -100,7 +102,16 @@ export function MyTasks() {
           {items.map((task) => (
             <div
               key={task.id}
-              className="border border-zinc-800 rounded-lg p-3 hover:border-zinc-700 transition-colors"
+              onClick={() => {
+                if (["ACTIVE", "APPROVED"].includes(task.status)) {
+                  setSelectedTaskId(task.id);
+                }
+              }}
+              className={`border border-zinc-800 rounded-lg p-3 transition-colors ${
+                ["ACTIVE", "APPROVED"].includes(task.status)
+                  ? "hover:border-zinc-600 cursor-pointer hover:bg-zinc-900/50"
+                  : ""
+              }`}
             >
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
@@ -163,6 +174,16 @@ export function MyTasks() {
           <span>Loading your tasks...</span>
         </div>
       </div>
+    );
+  }
+
+  // If a task is selected, show the detail page
+  if (selectedTaskId) {
+    return (
+      <TaskDetailPage
+        taskId={selectedTaskId}
+        onBack={() => setSelectedTaskId(null)}
+      />
     );
   }
 

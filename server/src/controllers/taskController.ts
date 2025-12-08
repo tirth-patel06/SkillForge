@@ -1,7 +1,7 @@
 import type { Response } from "express";
 import type { AuthRequest } from "../types/auth";
 import { Task } from "../models/Task";
-import { RubricCriteria } from "../models/MentorSystem";
+import { RubricCriteria, Submission } from "../models/MentorSystem";
 
 // GET /api/tasks - list tasks created by current mentor (optional status filter)
 export const getMyTasks = async (req: AuthRequest, res: Response) => {
@@ -37,6 +37,64 @@ export const getMyTasks = async (req: AuthRequest, res: Response) => {
     return res.status(200).json(formatted);
   } catch (err) {
     console.error("Get tasks error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// GET /api/tasks/:taskId - get detailed info for a single task
+export const getTaskDetail = async (req: AuthRequest, res: Response) => {
+  try {
+    const { taskId } = req.params;
+
+    const task = await Task.findById(taskId)
+      .populate("createdBy", "name email")
+      .lean();
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // Get rubric criteria for this task
+    const rubric = await RubricCriteria.find({ taskId })
+      .sort({ orderIndex: 1 })
+      .lean();
+
+    // Get submissions for this task
+    const submissions = await Submission.find({ taskId })
+      .select("_id studentId teamId status submittedAt")
+      .lean();
+
+    // Get unique enrolled students (from submissions and StudentEnrollment if exists)
+    const enrolledStudentIds = Array.from(
+      new Set(submissions.map((s) => s.studentId?.toString()).filter(Boolean))
+    );
+
+    // Format the response
+    const formatted = {
+      _id: task._id.toString(),
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      category: "General", // TODO: Add category field to Task model if needed
+      difficultyLevel: task.difficulty,
+      skillsRequired: task.techStack || [],
+      estimatedHours: 0, // TODO: Add to Task model if needed
+      mentorId: (task.createdBy as any)?._id?.toString(),
+      enrolledStudents: enrolledStudentIds,
+      submissions: submissions.map((s) => ({
+        _id: s._id.toString(),
+        studentId: s.studentId?.toString(),
+        status: s.status,
+        submittedAt: s.submittedAt,
+      })),
+      rubric: rubric.length > 0 ? { criteria: rubric } : undefined,
+      createdAt: task.createdAt,
+      updatedAt: task.createdAt, // TODO: Add updatedAt field to Task model
+    };
+
+    return res.status(200).json({ task: formatted });
+  } catch (err) {
+    console.error("Get task detail error:", err);
     return res.status(500).json({ message: "Server error" });
   }
 };
