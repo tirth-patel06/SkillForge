@@ -7,6 +7,7 @@ import path from "path";
 // Route imports
 import authRoutes from './routes/authRoutes'
 import studentRoutes from "./routes/studentRoutes";
+import adminReferralRoutes from './controllers/adminReferralApproval'
  //import mentorRoutes from "./routes/mentorRoutes.ts";
  //import taskRoutes from "./routes/taskRoutes";
  ////import submissionRoutes from "./routes/submissionRoutes";
@@ -43,6 +44,7 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/students", studentRoutes);        
 app.use("/api/auth", authRoutes);
 app.use('/api/admin/tasks',adminTaskRoutes)
+app.use('/api/admin/referrals',adminReferralRoutes)
 
 // 404 Handler
 app.use((_req, res) => {
