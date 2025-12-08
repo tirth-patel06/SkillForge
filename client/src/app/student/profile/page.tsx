@@ -61,16 +61,12 @@ const StudentProfilePage: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const token =
-          typeof window !== "undefined"
-            ? localStorage.getItem("token")
-            : null;
-
         const res = await fetch(`${API_BASE_URL}/api/students/me/profile`, {
+          method: "GET",
           headers: {
             "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
+          credentials: "include", // ✅ send cookies (JWT) with request
         });
 
         if (!res.ok) {
@@ -243,17 +239,12 @@ const StudentProfilePage: React.FC = () => {
       setSaving(true);
       setError(null);
 
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("token")
-          : null;
-
       const res = await fetch(`${API_BASE_URL}/api/students/me/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
+        credentials: "include", // ✅ send cookies
         body: JSON.stringify(profile),
       });
 

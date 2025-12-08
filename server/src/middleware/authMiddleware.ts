@@ -7,12 +7,22 @@ export const requireAuth = (
   res: Response,
   next: NextFunction
 ) => {
+  let token: string | undefined;
+
+  // 1️⃣ Prefer Authorization header if present
   const header = req.headers.authorization;
-  if (!header || !header.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
+  if (header && header.startsWith("Bearer ")) {
+    token = header.split(" ")[1];
   }
 
-  const token = header.split(" ")[1];
+  // 2️⃣ Fallback to httpOnly cookie (set on login)
+  if (!token && (req as any).cookies?.token) {
+    token = (req as any).cookies.token;
+  }
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
+  }
 
   try {
     const secret = process.env.JWT_SECRET;
