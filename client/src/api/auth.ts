@@ -1,13 +1,6 @@
 // client/src/api/auth.ts
-import axios from "axios";
-import { SetStateAction } from "react";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-const api = axios.create({
-  baseURL: `${API_URL}/api`,
-  withCredentials: true,
-});
+// Use the same api instance from lib/api to ensure interceptors are used
+import { api } from "@/lib/api";
 
 export type Role = "STUDENT" | "MENTOR" | "ADMIN";
 
@@ -31,7 +24,15 @@ export async function registerApi(data: {
 }
 
 export async function verifyEmailApi(data: { email: string; otp: string }) {
-  return api.post("/auth/verify-email", data);
+  const res = await api.post("/auth/verify-email", data);
+  
+  // Save token to localStorage
+  if (res.data.token) {
+    localStorage.setItem("token", res.data.token);
+    console.log("✅ Token saved from verifyEmailApi");
+  }
+  
+  return res;
 }
 
 export async function loginApi(data: {
@@ -39,7 +40,16 @@ export async function loginApi(data: {
   password: string;
   role?: Role;
 }) {
-  return api.post("/auth/login", data);
+  const res = await api.post("/auth/login", data);
+  console.log("📝 Login response:", res.data);
+  
+  // Save token to localStorage
+  if (res.data.token) {
+    localStorage.setItem("token", res.data.token);
+    console.log("✅ Token saved from loginApi");
+  }
+  
+  return res;
 }
 
 export async function meApi(): Promise<User> {

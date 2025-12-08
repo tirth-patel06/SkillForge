@@ -7,12 +7,10 @@ import cookieParser from "cookie-parser";
 // Route imports
 import authRoutes from "./routes/authRoutes";
 import studentRoutes from "./routes/studentRoutes";
-// import mentorRoutes from "./routes/mentorRoutes.ts";
-// import taskRoutes from "./routes/taskRoutes";
-// import submissionRoutes from "./routes/submissionRoutes";
-// import referralRoutes from "./routes/referralRoutes";
-// import studentRoutes from "./routes/studentRoutes";
-// import authRoutes from "./routes/authRoutes";
+import mentorRoutes from "./routes/mentorRoutes";
+import taskRoutes from "./routes/taskRoutes";
+import submissionRoutes from "./routes/submissionRoutes";
+import referralRoutes from "./routes/referralRoutes";
 
 const app = express();
 
@@ -37,12 +35,12 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-// app.use("/api/mentor", mentorRoutes);           
-// app.use("/api/tasks", taskRoutes);              
-// app.use("/api/submissions", submissionRoutes); 
-// app.use("/api/referrals", referralRoutes);     
-app.use("/api/students", studentRoutes);        
 app.use("/api/auth", authRoutes);
+app.use("/api/mentors", mentorRoutes);           
+app.use("/api/students", studentRoutes);        
+app.use("/api/tasks", taskRoutes);              
+app.use("/api/submissions", submissionRoutes); 
+app.use("/api/referrals", referralRoutes);     
 
 // 404 Handler
 app.use((_req, res) => {
