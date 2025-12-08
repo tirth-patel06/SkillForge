@@ -56,6 +56,7 @@ const calculateAttentionStatus = (task: any, submissions: any[]) => {
 };
 
 // GET /api/tasks - list tasks created by current mentor (optional status filter)
+// Returns ALL tasks, including resolved ones
 export const getMyTasks = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user || req.user.role !== "MENTOR") {
@@ -65,6 +66,8 @@ export const getMyTasks = async (req: AuthRequest, res: Response) => {
     const { status } = req.query as { status?: string };
 
     const query: any = { createdBy: req.user.id };
+    // Note: Do NOT filter out resolved tasks here - show all tasks
+    
     if (status && ["PENDING", "ACTIVE", "APPROVED", "REJECTED", "REMOVED"].includes(status)) {
       query.status = status;
     }
@@ -339,3 +342,65 @@ export const approveTask = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+// POST /api/tasks/:id/resolve - mentor resolves a critical issue and adds resolution notes
+export const resolveTask = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user || req.user.role !== "MENTOR") {
+      return res.status(403).json({ message: "Mentor access only" });
+    }
+
+    const { id } = req.params;
+    const { resolutionNotes, criticalReason } = req.body;
+
+    if (!resolutionNotes || resolutionNotes.trim().length === 0) {
+      return res.status(400).json({ message: "Resolution notes are required" });
+    }
+
+    const task = await Task.findOne({ _id: id, createdBy: req.user.id });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found or not owned by you" });
+    }
+
+    task.resolvedAt = new Date();
+    task.resolutionNotes = resolutionNotes.trim();
+    task.criticalReason = criticalReason || "Critical issue resolved"; // Store why it was critical
+    await task.save();
+
+    return res.status(200).json({ 
+      message: "Critical issue resolved", 
+      task: {
+        id: task._id,
+        resolvedAt: task.resolvedAt,
+        resolutionNotes: task.resolutionNotes,
+        criticalReason: task.criticalReason,
+      }
+    });
+  } catch (err) {
+    console.error("Resolve task error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// GET /api/tasks/resolved - get all resolved critical issues for mentor
+export const getResolvedTasks = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user || req.user.role !== "MENTOR") {
+      return res.status(403).json({ message: "Mentor access only" });
+    }
+
+    const tasks = await Task.find({ 
+      createdBy: req.user.id,
+      resolvedAt: { $exists: true, $ne: null }
+    })
+      .select("title status difficulty resolvedAt resolutionNotes criticalReason updatedAt createdAt")
+      .sort({ resolvedAt: -1 })
+      .lean();
+
+    return res.status(200).json(tasks);
+  } catch (err) {
+    console.error("Get resolved tasks error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+

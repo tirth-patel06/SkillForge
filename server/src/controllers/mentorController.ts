@@ -23,10 +23,10 @@ export const getMentorDashboard = async (req: AuthRequest, res: Response) => {
 
     const mentorId = req.user.id; // from JWT
 
-    //Fetch mentor's tasks
+    //Fetch mentor's tasks - Include REJECTED to show what needs attention
     const tasks: ITask[] = await Task.find({
       createdBy: mentorId,
-      status: { $in: ["PENDING", "ACTIVE", "APPROVED"] }, 
+      status: { $in: ["PENDING", "ACTIVE", "APPROVED", "REJECTED"] }, 
     }).lean();
 
     const taskIds = tasks.map((t) => t._id);
@@ -85,31 +85,19 @@ export const getMentorDashboard = async (req: AuthRequest, res: Response) => {
     //referralRequests = referrals in PENDING state for this mentor
     const referralRequests = referralsByStatus["PENDING"] || 0;
 
-    // Count critical attention tasks
+    // Count critical attention tasks (ONLY ACTIVE tasks with issues, NOT REJECTED/PENDING)
     let criticalAttentionCount = 0;
-    
-    // REJECTED tasks - Critical
-    const rejectedCount = await Task.countDocuments({
-      createdBy: mentorId,
-      status: "REJECTED",
-    });
-    criticalAttentionCount += rejectedCount;
-
-    // PENDING tasks for 14+ days - Critical
-    const fourteenDaysAgo = new Date();
-    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
-    const oldPendingCount = await Task.countDocuments({
-      createdBy: mentorId,
-      status: "PENDING",
-      createdAt: { $lt: fourteenDaysAgo },
-    });
-    criticalAttentionCount += oldPendingCount;
 
     // ACTIVE tasks with 5+ unreviewed submissions - Critical
+    // Note: Exclude REJECTED and PENDING from attention count since they're already visible
+    const activeTaskIds = tasks
+      .filter((t) => t.status === "ACTIVE")
+      .map((t) => t._id);
+
     const tasksWithManyUnreviewed = await Submission.aggregate([
       {
         $match: {
-          taskId: { $in: taskIds },
+          taskId: { $in: activeTaskIds },
           status: "PENDING",
         },
       },

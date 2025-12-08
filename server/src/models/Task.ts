@@ -15,6 +15,9 @@ export interface ITask extends Document {
   createdBy: mongoose.Types.ObjectId; // mentor (User) id
   status: TaskStatus;
   modNotes?: string; // notes by admin/mentor
+  resolvedAt?: Date; // when critical issue was resolved
+  resolutionNotes?: string; // how the issue was resolved
+  criticalReason?: string; // why it became critical
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +41,9 @@ const TaskSchema = new Schema<ITask>({
     default: "PENDING",
   },
   modNotes: String,
+  resolvedAt: Date,
+  resolutionNotes: String,
+  criticalReason: String,
 }, {
   timestamps: true, // Automatically adds createdAt and updatedAt
 });
