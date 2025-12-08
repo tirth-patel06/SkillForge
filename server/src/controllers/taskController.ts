@@ -78,7 +78,7 @@ export const getTaskDetail = async (req: AuthRequest, res: Response) => {
       category: "General", // TODO: Add category field to Task model if needed
       difficultyLevel: task.difficulty,
       skillsRequired: task.techStack || [],
-      estimatedHours: 0, // TODO: Add to Task model if needed
+      estimatedHours: task.estimatedHours || 2,
       mentorId: (task.createdBy as any)?._id?.toString(),
       enrolledStudents: enrolledStudentIds,
       submissions: submissions.map((s) => ({
@@ -89,7 +89,7 @@ export const getTaskDetail = async (req: AuthRequest, res: Response) => {
       })),
       rubric: rubric.length > 0 ? { criteria: rubric } : undefined,
       createdAt: task.createdAt,
-      updatedAt: task.createdAt, // TODO: Add updatedAt field to Task model
+      updatedAt: task.updatedAt,
     };
 
     return res.status(200).json({ task: formatted });
@@ -164,6 +164,61 @@ export const createTask = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// PUT /api/tasks/:taskId - update task details (mentor only, status not editable)
+export const updateTask = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user || req.user.role !== "MENTOR") {
+      return res.status(403).json({ message: "Mentor access only" });
+    }
+
+    const { taskId } = req.params;
+    const {
+      title,
+      description,
+      difficultyLevel,
+      skillsRequired,
+      estimatedHours,
+    } = req.body;
+
+    // Find task and verify ownership
+    const task = await Task.findOne({ _id: taskId, createdBy: req.user.id });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found or not owned by you" });
+    }
+
+    // Only allow editing PENDING tasks (before admin approval)
+    if (task.status !== "PENDING") {
+      return res.status(400).json({ 
+        message: "Only PENDING tasks can be edited. Once approved by admin, tasks cannot be modified." 
+      });
+    }
+
+    // Update only allowed fields (status is NOT editable by mentors)
+    if (title !== undefined) task.title = title;
+    if (description !== undefined) task.description = description;
+    if (difficultyLevel !== undefined) task.difficulty = difficultyLevel;
+    if (skillsRequired !== undefined) task.techStack = skillsRequired;
+    if (estimatedHours !== undefined) task.estimatedHours = estimatedHours;
+
+    await task.save();
+
+    return res.status(200).json({
+      message: "Task updated successfully",
+      task: {
+        _id: task._id,
+        title: task.title,
+        description: task.description,
+        difficulty: task.difficulty,
+        techStack: task.techStack,
+        estimatedHours: task.estimatedHours,
+      },
+    });
+  } catch (err) {
+    console.error("Update task error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 // DELETE /api/tasks/:id - soft remove a task created by the mentor
 export const removeTask = async (req: AuthRequest, res: Response) => {
   try {
@@ -184,6 +239,40 @@ export const removeTask = async (req: AuthRequest, res: Response) => {
     return res.status(200).json({ message: "Task removed", id });
   } catch (err) {
     console.error("Remove task error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// POST /api/tasks/:id/approve - mentor marks their ACTIVE task as APPROVED (completed)
+export const approveTask = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user || req.user.role !== "MENTOR") {
+      return res.status(403).json({ message: "Mentor access only" });
+    }
+
+    const { id } = req.params;
+
+    const task = await Task.findOne({ _id: id, createdBy: req.user.id });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found or not owned by you" });
+    }
+
+    if (task.status !== "ACTIVE") {
+      return res.status(400).json({ message: "Only ACTIVE tasks can be approved" });
+    }
+
+    task.status = "APPROVED";
+    await task.save();
+
+    return res.status(200).json({ 
+      message: "Task approved successfully. Students can no longer enroll.", 
+      task: {
+        id: task._id,
+        status: task.status,
+      }
+    });
+  } catch (err) {
+    console.error("Approve task error:", err);
     return res.status(500).json({ message: "Server error" });
   }
 };

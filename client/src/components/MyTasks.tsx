@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
-import { Loader2, Trash2, Clock, AlertCircle, Circle } from "lucide-react";
+import { Loader2, Trash2, Clock, AlertCircle, Circle, CheckCircle } from "lucide-react";
 import { TaskDetailPage } from "@/components/TaskDetailPage";
 
 export type TaskStatus = "PENDING" | "ACTIVE" | "APPROVED" | "REJECTED" | "REMOVED";
@@ -48,6 +48,7 @@ export function MyTasks() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
@@ -85,6 +86,20 @@ export function MyTasks() {
     }
   }
 
+  async function approveTask(id: string) {
+    setApprovingId(id);
+    setError(null);
+    try {
+      await api.post(`/tasks/${id}/approve`);
+      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: "APPROVED" } : t)));
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error?.response?.data?.message || "Failed to approve task");
+    } finally {
+      setApprovingId(null);
+    }
+  }
+
   const renderList = (items: TaskItem[], title: string, accent: string) => (
     <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
       <div className="flex items-center justify-between mb-3">
@@ -103,12 +118,12 @@ export function MyTasks() {
             <div
               key={task.id}
               onClick={() => {
-                if (["ACTIVE", "APPROVED"].includes(task.status)) {
+                if (["PENDING", "ACTIVE", "APPROVED"].includes(task.status)) {
                   setSelectedTaskId(task.id);
                 }
               }}
               className={`border border-zinc-800 rounded-lg p-3 transition-colors ${
-                ["ACTIVE", "APPROVED"].includes(task.status)
+                ["PENDING", "ACTIVE", "APPROVED"].includes(task.status)
                   ? "hover:border-zinc-600 cursor-pointer hover:bg-zinc-900/50"
                   : ""
               }`}
@@ -138,9 +153,29 @@ export function MyTasks() {
                 </div>
 
                 <div className="flex items-center space-x-2">
+                  {task.status === "ACTIVE" && (
+                    <button
+                      disabled={approvingId === task.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        approveTask(task.id);
+                      }}
+                      className="flex items-center space-x-2 text-sm text-green-400 hover:text-green-300 disabled:opacity-50 px-3 py-1 border border-green-700 rounded-lg hover:bg-green-900/20 transition-colors"
+                    >
+                      {approvingId === task.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <CheckCircle className="w-4 h-4" />
+                      )}
+                      <span>{approvingId === task.id ? "Approving..." : "Approve"}</span>
+                    </button>
+                  )}
                   <button
                     disabled={removingId === task.id || task.status === "REMOVED"}
-                    onClick={() => removeTask(task.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeTask(task.id);
+                    }}
                     className="flex items-center space-x-2 text-sm text-red-400 hover:text-red-300 disabled:opacity-50"
                   >
                     {removingId === task.id ? (
