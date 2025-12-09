@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-
+import chatRoutes from "./routes/chatRoutes";
 // Route imports
 import authRoutes from "./routes/authRoutes";
 import studentRoutes from "./routes/studentRoutes";
@@ -43,7 +43,7 @@ app.get("/api/health", (_req, res) => {
 // app.use("/api/referrals", referralRoutes);     
       
 app.use("/api/auth", authRoutes);
-
+app.use("/api/chat", chatRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/teams", teamRoutes);
 // 404 Handler
