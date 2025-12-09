@@ -208,21 +208,23 @@ export function MyTasks() {
                       <span>{approvingId === task.id ? "Approving..." : "Approve"}</span>
                     </button>
                   )}
-                  <button
-                    disabled={removingId === task.id || task.status === "REMOVED"}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeTask(task.id);
-                    }}
-                    className="flex items-center space-x-2 text-sm text-red-400 hover:text-red-300 disabled:opacity-50"
-                  >
-                    {removingId === task.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="w-4 h-4" />
-                    )}
-                    <span>{task.status === "REMOVED" ? "Removed" : "Remove"}</span>
-                  </button>
+                  {task.status === "PENDING" && (
+                    <button
+                      disabled={removingId === task.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeTask(task.id);
+                      }}
+                      className="flex items-center space-x-2 text-sm text-red-400 hover:text-red-300 disabled:opacity-50"
+                    >
+                      {removingId === task.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
+                      <span>{removingId === task.id ? "Removing..." : "Remove"}</span>
+                    </button>
+                  )}
                 </div>
               </div>
 

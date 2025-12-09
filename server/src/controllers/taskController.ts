@@ -213,7 +213,7 @@ export const createTask = async (req: AuthRequest, res: Response) => {
       expectedTeamSize,
       deadline: deadline ? new Date(deadline) : undefined,
       createdBy: req.user.id,          // User _id from JWT
-      status: "ACTIVE",               // mentor-created → active by default
+      status: "PENDING",               // Pending approval by admin
     });
 
     // Create rubric criteria records linked to this task
@@ -303,6 +303,11 @@ export const removeTask = async (req: AuthRequest, res: Response) => {
     const task = await Task.findOne({ _id: id, createdBy: req.user.id });
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
+    }
+
+    // Only allow removing PENDING tasks
+    if (task.status !== "PENDING") {
+      return res.status(400).json({ message: "Only PENDING tasks can be removed" });
     }
 
     task.status = "REMOVED";

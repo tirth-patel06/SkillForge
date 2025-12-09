@@ -117,7 +117,7 @@ export const getMentorDashboard = async (req: AuthRequest, res: Response) => {
 
     const dashboardPayload = {
       pendingReviews: pendingCount,
-      activeTasks: tasks.length,
+      activeTasks: tasks.filter((t) => t.status === "ACTIVE").length,
       teamsNeedingAttention: criticalAttentionCount,
       referralRequests,
       recentSubmissions: recentPendingSubmissions.map((sub) => ({

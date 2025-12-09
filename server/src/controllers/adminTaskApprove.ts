@@ -24,7 +24,7 @@ router.post("/:id/moderate", requireAuth, requireAdmin, async (req, res) => {
   const task = await Task.findById(req.params.id);
   if (!task) return res.status(404).json({ error: "Task not found" });
 
-  if (action === "approve") task.status = "APPROVED";
+  if (action === "approve") task.status = "ACTIVE";
   else if (action === "reject") task.status = "REJECTED";
   else if (action === "remove") task.status = "REMOVED";
   else return res.status(400).json({ error: "Invalid action" });

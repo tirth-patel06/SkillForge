@@ -1,8 +1,10 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export type TaskStatus = "PENDING" | "ACTIVE" | "APPROVED" | "REJECTED" | "REMOVED";
-// PENDING, ACTIVE, REJECTED – for mentor status
-// APPROVED, REMOVED – for admin control
+// PENDING – waiting for admin approval
+// ACTIVE – approved by admin and ready for student enrollment
+// REJECTED, REMOVED – admin rejection or removal
+// APPROVED – legacy status (use ACTIVE instead)
 
 export interface ITask extends Document {
   title: string;
@@ -38,7 +40,7 @@ const TaskSchema = new Schema<ITask>({
   status: {
     type: String,
     enum: ["PENDING", "ACTIVE", "APPROVED", "REJECTED", "REMOVED"],
-    default: "ACTIVE",
+    default: "PENDING",
   },
   modNotes: String,
   resolvedAt: Date,
