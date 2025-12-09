@@ -6,12 +6,10 @@ import http from "http";
 import mongoose from "mongoose";
 import app from "./app";
 import { initSocket } from "./socket";
-import { seedDemo } from "./utils/seed";
+//import { seedDemo } from "./utils/seed";
 
 const PORT = process.env.PORT || 8000;
-const MONGO_URI =
-  process.env.MONGO_URI ||
-  "mongodb+srv://admin:aditya123@cluster0.pbdlbep.mongodb.net/hustleHaveli2";
+const MONGO_URI =process.env.MONGO_URI as string ;
 
 // ----------------------------
 // START SERVER FUNCTION
@@ -30,12 +28,12 @@ async function startServer() {
     initSocket(server);
 
     // 4️⃣ Seed Demo Data
-    try {
-      await seedDemo();
-      console.log("🌱 Demo data seeded.");
-    } catch (seedErr) {
-      console.error("⚠️ Seed error:", seedErr);
-    }
+   // try {
+     // await seedDemo();
+     // console.log("🌱 Demo data seeded.");
+   // } catch (seedErr) {
+//console.error("⚠️ Seed error:", seedErr);
+   // }
 
     // 5️⃣ Start server
     server.listen(PORT, () => {
