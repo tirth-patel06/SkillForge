@@ -613,6 +613,6 @@ For questions or feedback, reach out to the team:
 
 ---
 
-**Made with ❤️ by the Hustle Haveli Team**
+**Made with ❤️ by the Eleven's squad Team**
 
 *Last Updated: December 2025*
