@@ -1,10 +1,10 @@
 // server/src/server.ts
 import dotenv from "dotenv";
 dotenv.config();
-
+import http from "http";
 import mongoose from "mongoose";
 import app from "./app";
-
+import { initSocket } from "./socket";
 const PORT = process.env.PORT || 8000;
 const MONGO_URI =
   process.env.MONGO_URI || "mongodb://127.0.0.1:27017/mentor-hub";
@@ -14,9 +14,10 @@ async function start() {
     // Connect to MongoDB
     await mongoose.connect(MONGO_URI);
     console.log("✅ MongoDB connected");
-
+    const server = http.createServer(app);
+    initSocket(server);
     // Start HTTP server
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
   } catch (err) {
