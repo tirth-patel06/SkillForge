@@ -85,35 +85,49 @@ export const getMentorDashboard = async (req: AuthRequest, res: Response) => {
     //referralRequests = referrals in PENDING state for this mentor
     const referralRequests = referralsByStatus["PENDING"] || 0;
 
-    // Count critical attention tasks (ONLY ACTIVE tasks with issues, NOT REJECTED/PENDING)
+    // Count ALL critical attention tasks
     let criticalAttentionCount = 0;
 
-    // ACTIVE tasks with 5+ unreviewed submissions - Critical
-    // Note: Exclude REJECTED and PENDING from attention count since they're already visible
-    const activeTaskIds = tasks
-      .filter((t) => t.status === "ACTIVE")
-      .map((t) => t._id);
+    // Count tasks by checking their actual attention status
+    for (const task of tasks) {
+      // Skip tasks that have been resolved
+      if (task.resolvedAt) {
+        continue;
+      }
 
-    const tasksWithManyUnreviewed = await Submission.aggregate([
-      {
-        $match: {
-          taskId: { $in: activeTaskIds },
-          status: "PENDING",
-        },
-      },
-      {
-        $group: {
-          _id: "$taskId",
-          unreviewedCount: { $sum: 1 },
-        },
-      },
-      {
-        $match: {
-          unreviewedCount: { $gte: 5 },
-        },
-      },
-    ]);
-    criticalAttentionCount += tasksWithManyUnreviewed.length;
+      // Get submissions for this task
+      const taskSubmissions = await Submission.find({ taskId: task._id }).lean();
+      
+      // Calculate days pending for PENDING tasks
+      const daysPending = Math.floor(
+        (new Date().getTime() - new Date(task.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      // Check if task is critical
+      let isCritical = false;
+
+      // REJECTED tasks are always critical
+      if (task.status === "REJECTED") {
+        isCritical = true;
+      }
+      // ACTIVE tasks with 5+ unreviewed submissions
+      else if (task.status === "ACTIVE") {
+        const unreviewed = taskSubmissions.filter(
+          (s) => s.status === "PENDING" && s.submittedAt
+        ).length;
+        if (unreviewed >= 5) {
+          isCritical = true;
+        }
+      }
+      // PENDING tasks for 14+ days
+      else if (task.status === "PENDING" && daysPending >= 14) {
+        isCritical = true;
+      }
+
+      if (isCritical) {
+        criticalAttentionCount++;
+      }
+    }
 
     const dashboardPayload = {
       pendingReviews: pendingCount,
