@@ -207,7 +207,7 @@ export const createTask = async (req: AuthRequest, res: Response) => {
       expectedTeamSize,
       deadline: deadline ? new Date(deadline) : undefined,
       createdBy: req.user.id,          // User _id from JWT
-      status: "PENDING",               // mentor-created → pending by default
+      status: "ACTIVE",               // mentor-created → active by default
     });
 
     // Create rubric criteria records linked to this task

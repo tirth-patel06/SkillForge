@@ -167,7 +167,7 @@ export function TaskCreation() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-2 flex items-center">
+                <label className="text-sm font-medium text-zinc-300 mb-2 flex items-center">
                   <Users className="w-4 h-4 mr-2" />
                   Expected Team Size
                 </label>
@@ -184,7 +184,7 @@ export function TaskCreation() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-2 flex items-center">
+                <label className="text-sm font-medium text-zinc-300 mb-2 flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
                   Deadline
                 </label>
@@ -198,7 +198,7 @@ export function TaskCreation() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2 flex items-center">
+              <label className="block text-sm font-medium text-zinc-300 mb-2 items-center">
                 <Tag className="w-4 h-4 mr-2" />
                 Tech Stack
               </label>
