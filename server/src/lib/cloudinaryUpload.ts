@@ -1,48 +1,29 @@
-import { cloudinary } from "../config/cloudinary";
+// server/src/lib/cloudinaryUpload.ts
+import cloudinary from "../config/cloudinary";
+import { Readable } from "stream";
 
-export const uploadToCloudinary = async (
-  fileBuffer: Buffer,
-  fileName: string,
-  folder: string = "mentor-profiles"
-): Promise<string> => {
+export function uploadBufferToCloudinary(
+buffer: Buffer, folder: string = "uploads", p0: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    console.log(`📤 Starting upload: ${fileName} to folder ${folder}`);
-
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: "auto",
-        folder: folder,
-        public_id: fileName.split(".")[0],
-        overwrite: true,
-        timeout: 30000, // 30 second timeout
-      },
-      (error, result) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder },
+      (error: any, result: any) => {
         if (error) {
-          console.error("❌ Upload error:", error);
-          reject(error);
-        } else {
-          console.log("✅ Upload successful:", result?.secure_url);
-          resolve(result?.secure_url || "");
+          return reject(error);
         }
+        if (!result || !result.secure_url) {
+          return reject(new Error("No result from Cloudinary"));
+        }
+        resolve(result.secure_url);
       }
     );
 
-    stream.on("error", (err) => {
-      console.error("❌ Stream error:", err);
+    const stream = Readable.from(buffer);
+
+    stream.on("error", (err: any) => {
       reject(err);
     });
 
-    // Write buffer directly to stream
-    stream.write(fileBuffer);
-    stream.end();
+    stream.pipe(uploadStream);
   });
-};
-
-export const deleteFromCloudinary = async (publicId: string): Promise<void> => {
-  try {
-    await cloudinary.uploader.destroy(publicId);
-  } catch (error) {
-    console.error("Error deleting from Cloudinary:", error);
-    throw error;
-  }
-};
+}
