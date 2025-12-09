@@ -11,6 +11,7 @@ import {
   submitWork,
   SubmissionStatus,
 } from "@/api/studentTasks";
+import { TaskComments } from "@/components/TaskComments";
 
 type Tab = "explore" | "enrolled";
 
@@ -132,7 +133,7 @@ function StudentTasksInner() {
   return (
     <div className="min-h-screen flex flex-col bg-[#02040b] text-slate-100">
       {/* Header + Tabs */}
-      <header className="border-b border-slate-900 px-6 py-4 flex items-center justify-between bg-linear-to-b from-black/80 via-[#020617] to-transparent backdrop-blur-md">
+      <header className="border-b border-slate-900 px-6 py-4 flex items-center justify-between bg-gradient-to-b from-black/80 via-[#020617] to-transparent backdrop-blur-md">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-black/60 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-400">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -142,8 +143,8 @@ function StudentTasksInner() {
             My Tasks & Projects
           </h1>
           <p className="text-sm text-slate-400 max-w-xl">
-            Explore mentor-assigned tasks, enroll as an individual or team, and
-            submit your work with GitHub links.
+            Explore mentor-assigned tasks, enroll, and submit your work with
+            GitHub links and discussions.
           </p>
         </div>
 
@@ -265,7 +266,7 @@ function ExploreView({
       {/* LEFT: Filters + Active Task List */}
       <section className="w-full md:w-[45%] border-r border-slate-900 flex flex-col bg-[#050816]">
         {/* Filters */}
-        <div className="px-4 py-3 border-b border-slate-900 space-y-3 bg-linear-to-b from-slate-950/80 to-slate-950/40">
+        <div className="px-4 py-3 border-b border-slate-900 space-y-3 bg-gradient-to-b from-slate-950/80 to-slate-950/40">
           <div className="flex flex-col gap-2 sm:flex-row">
             <div className="relative flex-1">
               <input
@@ -347,7 +348,7 @@ function ExploreView({
                 >
                   <div className="flex justify-between gap-3">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold text-slate-100 line-clamp-1">
                           {task.title}
                         </h3>
@@ -402,12 +403,12 @@ function ExploreView({
         </div>
       </section>
 
-      {/* RIGHT: Task Details + Enroll Button */}
+      {/* RIGHT: Task Details + Enroll Button (desktop) */}
       <section className="hidden md:flex flex-1 flex-col bg-[#020617]">
         {selected ? (
           <div className="h-full flex flex-col">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-900 flex justify-between items-start gap-3 bg-linear-to-r from-slate-950 via-slate-900/70 to-slate-950">
+            <div className="px-6 py-4 border-b border-slate-900 flex justify-between items-start gap-3 bg-gradient-to-r from-slate-950 via-slate-900/70 to-slate-950">
               <div className="space-y-1">
                 <h2 className="text-lg md:text-xl font-semibold text-slate-50">
                   {selected.title}
@@ -471,8 +472,8 @@ function ExploreView({
             {/* Footer */}
             <div className="px-6 py-3 border-t border-slate-900 flex items-center justify-between bg-black/60 backdrop-blur">
               <p className="text-[11px] text-slate-500 max-w-sm">
-                Enroll to link this task with your student space, collaborate with
-                your team, and submit work.
+                Enroll to link this task with your student space and start
+                collaborating & submitting work.
               </p>
               <button
                 onClick={() => !isSelectedEnrolled && onEnroll(selected)}
@@ -503,9 +504,6 @@ function ExploreView({
           </div>
         )}
       </section>
-
-      {/* On mobile, only left column is visible (list + filters).
-          If you want enroll button on mobile later, we can add a bottom sheet. */}
     </>
   );
 }
@@ -539,6 +537,9 @@ function EnrolledView({
 }) {
   const [githubInputs, setGithubInputs] = useState<Record<string, string>>({});
   const [descInputs, setDescInputs] = useState<Record<string, string>>({});
+  const [openCommentsTaskId, setOpenCommentsTaskId] = useState<string | null>(
+    null
+  );
 
   if (loading) {
     return (
@@ -563,135 +564,320 @@ function EnrolledView({
     );
   }
 
+  // Group by submission status → for board-style view
+  const pending = items.filter((i) => i.submissionStatus === "PENDING");
+  const changesRequested = items.filter(
+    (i) => i.submissionStatus === "CHANGES_REQUESTED"
+  );
+  const approved = items.filter((i) => i.submissionStatus === "APPROVED");
+
+  const ongoingItems = items.filter(
+    (i) => i.submissionStatus !== "APPROVED"
+  );
+  const completedItems = approved;
+
   const isSubmitted = (status: SubmissionStatus) =>
     status === "PENDING" || status === "APPROVED" || status === "CHANGES_REQUESTED";
 
   return (
     <section className="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-[#020617]">
-      {items.map((item) => {
-        const gitValue = githubInputs[item.submissionId] ?? item.githubUrl;
-        const descValue = descInputs[item.submissionId] ?? item.workDescription;
+      {/* Summary strip: pending / changes / approved */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-2">
+        <div className="rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2">
+          <p className="text-[11px] text-slate-400">Pending Review</p>
+          <p className="text-lg font-semibold text-slate-50">
+            {pending.length}
+          </p>
+        </div>
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-3 py-2">
+          <p className="text-[11px] text-amber-300">Changes Requested</p>
+          <p className="text-lg font-semibold text-amber-100">
+            {changesRequested.length}
+          </p>
+        </div>
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-3 py-2">
+          <p className="text-[11px] text-emerald-300">Approved / Completed</p>
+          <p className="text-lg font-semibold text-emerald-100">
+            {approved.length}
+          </p>
+        </div>
+      </div>
 
-        return (
-          <div
-            key={item.submissionId}
-            className="rounded-2xl border border-slate-900 bg-[#050814] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.9)] space-y-3"
-          >
-            {/* Header */}
-            <div className="flex justify-between gap-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-semibold text-slate-100">
-                    {item.title}
-                  </h3>
-                  <span
-                    className={`text-[11px] px-2 py-0.5 rounded-full border ${statusBadgeClass(
-                      item.submissionStatus
-                    )}`}
-                  >
-                    {item.submissionStatus}
-                  </span>
-                </div>
-                {item.description && (
-                  <p className="text-xs text-slate-400 line-clamp-2">
-                    {item.description}
-                  </p>
-                )}
-                <div className="flex flex-wrap gap-1 mt-1 text-[11px] text-slate-400">
-                  {item.techStack.slice(0, 3).map((tag) => (
+      {/* Ongoing section */}
+      <div className="space-y-3">
+        <h2 className="text-xs font-semibold text-slate-300 uppercase tracking-[0.16em]">
+          Ongoing Tasks
+        </h2>
+        {ongoingItems.length === 0 ? (
+          <p className="text-[12px] text-slate-500">
+            No ongoing tasks right now. You&apos;re all caught up 🎉
+          </p>
+        ) : null}
+
+        {ongoingItems.map((item) => {
+          const gitValue = githubInputs[item.submissionId] ?? item.githubUrl;
+          const descValue = descInputs[item.submissionId] ?? item.workDescription;
+          const isCommentsOpen = openCommentsTaskId === item.taskId;
+
+          return (
+            <div
+              key={item.submissionId}
+              className="rounded-2xl border border-slate-900 bg-[#050814] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.9)] space-y-3"
+            >
+              {/* Header */}
+              <div className="flex justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-semibold text-slate-100">
+                      {item.title}
+                    </h3>
                     <span
-                      key={tag}
-                      className="px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-slate-200"
+                      className={`text-[11px] px-2 py-0.5 rounded-full border ${statusBadgeClass(
+                        item.submissionStatus
+                      )}`}
                     >
-                      {tag}
+                      {item.submissionStatus}
                     </span>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-1 mt-1 text-[11px] text-slate-500">
-                  <span>Task: {item.taskStatus}</span>
-                  <span>•</span>
-                  <span>Submission: {item.submissionStatus}</span>
-                  {item.deadline && (
-                    <>
-                      <span>•</span>
-                      <span>
-                        Deadline:{" "}
-                        {new Date(item.deadline).toLocaleDateString()}
+                  </div>
+                  {item.description && (
+                    <p className="text-xs text-slate-400 line-clamp-2">
+                      {item.description}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-1 mt-1 text-[11px] text-slate-400">
+                    {item.techStack.slice(0, 3).map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-slate-200"
+                      >
+                        {tag}
                       </span>
-                    </>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap gap-1 mt-1 text-[11px] text-slate-500">
+                    <span>Task: {item.taskStatus}</span>
+                    <span>•</span>
+                    <span>Submission: {item.submissionStatus}</span>
+                    {item.deadline && (
+                      <>
+                        <span>•</span>
+                        <span>
+                          Deadline:{" "}
+                          {new Date(item.deadline).toLocaleDateString()}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="text-right text-[11px] text-slate-500 shrink-0">
+                  <p>Enrolled: {new Date(item.enrolledAt).toLocaleDateString()}</p>
+                  {item.submittedAt && (
+                    <p>
+                      Submitted:{" "}
+                      {new Date(item.submittedAt).toLocaleDateString()}
+                    </p>
                   )}
                 </div>
               </div>
-              <div className="text-right text-[11px] text-slate-500 shrink-0">
-                <p>Enrolled: {new Date(item.enrolledAt).toLocaleDateString()}</p>
-                {item.submittedAt && (
-                  <p>
-                    Submitted:{" "}
-                    {new Date(item.submittedAt).toLocaleDateString()}
-                  </p>
+
+              {/* Submit/Update form */}
+              <div className="mt-3 space-y-3 rounded-xl border border-slate-800 bg-slate-950/70 p-3">
+                <div>
+                  <label className="text-xs text-slate-400 block mb-1">
+                    GitHub Repository URL
+                  </label>
+                  <input
+                    value={gitValue}
+                    onChange={(e) =>
+                      setGithubInputs((prev) => ({
+                        ...prev,
+                        [item.submissionId]: e.target.value,
+                      }))
+                    }
+                    placeholder="https://github.com/username/repository"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500/60"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-slate-400 block mb-1">
+                    Work Description
+                  </label>
+                  <textarea
+                    value={descValue}
+                    onChange={(e) =>
+                      setDescInputs((prev) => ({
+                        ...prev,
+                        [item.submissionId]: e.target.value,
+                      }))
+                    }
+                    rows={3}
+                    placeholder="Explain what you built, key features, how to run, etc."
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500/60"
+                  />
+                </div>
+
+                <div className="flex justify-between items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenCommentsTaskId((prev) =>
+                        prev === item.taskId ? null : item.taskId
+                      )
+                    }
+                    className="px-3 py-1.5 text-[11px] rounded-lg border border-slate-700 bg-slate-950 hover:bg-slate-900 text-slate-200"
+                  >
+                    {isCommentsOpen ? "Hide Discussion" : "Open Discussion"}
+                  </button>
+
+                  <button
+                    disabled={submittingId === item.submissionId}
+                    onClick={() =>
+                      onSubmitWork(item, gitValue || "", descValue || "")
+                    }
+                    className="px-4 py-2 text-sm rounded-lg bg-sky-600 hover:bg-sky-500 text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_0_1px_rgba(56,189,248,0.4)]"
+                  >
+                    {submittingId === item.submissionId
+                      ? "Submitting..."
+                      : isSubmitted(item.submissionStatus)
+                      ? "Update Submission"
+                      : "Submit Work"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Comments / Discussion */}
+              {isCommentsOpen && (
+                <div className="pt-3 border-t border-slate-800">
+                  <TaskComments
+                    taskId={item.taskId}
+                    taskTitle={item.title}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Completed tasks (Approved) */}
+      <div className="space-y-3 pt-4">
+        <h2 className="text-xs font-semibold text-slate-300 uppercase tracking-[0.16em]">
+          Completed / Approved Tasks
+        </h2>
+        {completedItems.length === 0 ? (
+          <p className="text-[12px] text-slate-500">
+            Approved tasks will move here once your mentor marks them as
+            completed.
+          </p>
+        ) : null}
+
+        {completedItems.map((item) => {
+          const isCommentsOpen = openCommentsTaskId === item.taskId;
+          const gitValue = githubInputs[item.submissionId] ?? item.githubUrl;
+          const descValue = descInputs[item.submissionId] ?? item.workDescription;
+
+          return (
+            <div
+              key={item.submissionId}
+              className="rounded-2xl border border-emerald-600/40 bg-emerald-950/40 p-4 shadow-[0_18px_50px_rgba(4,120,87,0.4)] space-y-3"
+            >
+              <div className="flex justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-semibold text-emerald-50">
+                      {item.title}
+                    </h3>
+                    <span
+                      className={`text-[11px] px-2 py-0.5 rounded-full border ${statusBadgeClass(
+                        item.submissionStatus
+                      )}`}
+                    >
+                      {item.submissionStatus}
+                    </span>
+                  </div>
+                  {item.description && (
+                    <p className="text-xs text-emerald-100/80 line-clamp-2">
+                      {item.description}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-1 mt-1 text-[11px] text-emerald-100/80">
+                    {item.techStack.slice(0, 3).map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-0.5 rounded-full bg-emerald-900/40 border border-emerald-500/60"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="text-right text-[11px] text-emerald-100/70 shrink-0">
+                  <p>Enrolled: {new Date(item.enrolledAt).toLocaleDateString()}</p>
+                  {item.submittedAt && (
+                    <p>
+                      Approved:{" "}
+                      {new Date(item.submittedAt).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Read-only summary of last submitted links */}
+              <div className="mt-2 space-y-2 rounded-xl border border-emerald-500/30 bg-emerald-950/40 p-3">
+                {gitValue && (
+                  <div>
+                    <p className="text-[11px] text-emerald-200 mb-0.5">
+                      GitHub Repository
+                    </p>
+                    <a
+                      href={gitValue}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-emerald-300 underline break-all"
+                    >
+                      {gitValue}
+                    </a>
+                  </div>
+                )}
+                {descValue && (
+                  <div>
+                    <p className="text-[11px] text-emerald-200 mb-0.5">
+                      Work Summary
+                    </p>
+                    <p className="text-xs text-emerald-100/90 whitespace-pre-wrap">
+                      {descValue}
+                    </p>
+                  </div>
                 )}
               </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenCommentsTaskId((prev) =>
+                    prev === item.taskId ? null : item.taskId
+                  )
+                }
+                className="px-3 py-1.5 text-[11px] rounded-lg border border-emerald-500/40 bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-100"
+              >
+                {isCommentsOpen
+                  ? "Hide Discussion"
+                  : "View Discussion / Feedback"}
+              </button>
+
+              {isCommentsOpen && (
+                <div className="pt-3 border-t border-emerald-500/40">
+                  <TaskComments
+                    taskId={item.taskId}
+                    taskTitle={item.title}
+                  />
+                </div>
+              )}
             </div>
-
-            {/* Submit/Update form */}
-            <div className="mt-3 space-y-3 rounded-xl border border-slate-800 bg-slate-950/70 p-3">
-              <div>
-                <label className="text-xs text-slate-400 block mb-1">
-                  GitHub Repository URL
-                </label>
-                <input
-                  value={gitValue}
-                  onChange={(e) =>
-                    setGithubInputs((prev) => ({
-                      ...prev,
-                      [item.submissionId]: e.target.value,
-                    }))
-                  }
-                  placeholder="https://github.com/username/repository"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500/60"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs text-slate-400 block mb-1">
-                  Work Description
-                </label>
-                <textarea
-                  value={descValue}
-                  onChange={(e) =>
-                    setDescInputs((prev) => ({
-                      ...prev,
-                      [item.submissionId]: e.target.value,
-                    }))
-                  }
-                  rows={3}
-                  placeholder="Explain what you built, key features, how to run, etc."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500/60"
-                />
-              </div>
-
-              <div className="flex justify-between items-center">
-                <p className="text-[11px] text-slate-500">
-                  You can update your submission any time before mentor review.
-                </p>
-                <button
-                  disabled={submittingId === item.submissionId}
-                  onClick={() =>
-                    onSubmitWork(item, gitValue || "", descValue || "")
-                  }
-                  className="px-4 py-2 text-sm rounded-lg bg-sky-600 hover:bg-sky-500 text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_0_1px_rgba(56,189,248,0.4)]"
-                >
-                  {submittingId === item.submissionId
-                    ? "Submitting..."
-                    : isSubmitted(item.submissionStatus)
-                    ? "Update Submission"
-                    : "Submit Work"}
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </section>
   );
 }

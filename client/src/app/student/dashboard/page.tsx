@@ -5,11 +5,22 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { meApi, logoutApi, type User } from "@/api/auth";
+import { fetchEnrolledTasks, EnrolledTaskItem } from "@/api/studentTasks";
 
 function StudentDashboardInner() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
+
+  // 🔹 Task summary state
+  const [taskSummary, setTaskSummary] = useState({
+    pendingReviews: 0,
+    activeTasks: 0,
+    approvedTasks: 0,
+    otherTasks: 0,
+    needingAttention: 0,
+  });
+  const [tasksLoading, setTasksLoading] = useState(true);
 
   useEffect(() => {
     meApi()
@@ -18,6 +29,57 @@ function StudentDashboardInner() {
         window.location.href = "/auth";
       })
       .finally(() => setLoading(false));
+  }, []);
+
+  // 🔹 Load enrolled tasks once to compute summary
+  useEffect(() => {
+    const loadTaskSummary = async () => {
+      try {
+        setTasksLoading(true);
+        const items: EnrolledTaskItem[] = await fetchEnrolledTasks();
+
+        const pendingReviews = items.filter(
+          (i) => i.submissionStatus === "PENDING"
+        ).length;
+
+        const approvedTasks = items.filter(
+          (i) => i.submissionStatus === "APPROVED"
+        ).length;
+
+        const activeTasks = items.filter(
+          (i) => i.taskStatus === "ACTIVE" && i.submissionStatus !== "APPROVED"
+        ).length;
+
+        // Needing attention: changes requested OR deadline soon (within 3 days)
+        const now = new Date().getTime();
+        const threeDays = 3 * 24 * 60 * 60 * 1000;
+        const needingAttention = items.filter((i) => {
+          const hasChanges = i.submissionStatus === "CHANGES_REQUESTED";
+          const hasNearDeadline =
+            i.deadline &&
+            new Date(i.deadline).getTime() - now <= threeDays &&
+            i.submissionStatus !== "APPROVED";
+          return hasChanges || hasNearDeadline;
+        }).length;
+
+        const otherTasks =
+          items.length - (activeTasks + approvedTasks + pendingReviews);
+
+        setTaskSummary({
+          pendingReviews,
+          activeTasks,
+          approvedTasks,
+          otherTasks: otherTasks < 0 ? 0 : otherTasks,
+          needingAttention,
+        });
+      } catch (err) {
+        console.error("Failed to load student task summary", err);
+      } finally {
+        setTasksLoading(false);
+      }
+    };
+
+    loadTaskSummary();
   }, []);
 
   const handleLogout = async () => {
@@ -87,7 +149,7 @@ function StudentDashboardInner() {
         <div className="px-4 pb-4 pt-2 border-t border-slate-900">
           {user && (
             <div className="mb-3 flex items-center gap-3 rounded-xl bg-slate-900/70 px-3 py-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-sky-500 to-emerald-400 text-xs font-semibold text-slate-950">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-emerald-400 text-xs font-semibold text-slate-950">
                 {(user.name || user.email || "?").charAt(0).toUpperCase()}
               </div>
               <div className="flex-1">
@@ -145,22 +207,34 @@ function StudentDashboardInner() {
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <MetricCard
               title="Pending Reviews"
-              value="0"
+              value={
+                tasksLoading
+                  ? "—"
+                  : String(taskSummary.pendingReviews)
+              }
               subtitle="submissions awaiting feedback"
               accent="from-[#f97316] to-[#fb923c]"
               icon="⏳"
             />
             <MetricCard
               title="Active Tasks"
-              value="2"
+              value={
+                tasksLoading
+                  ? "—"
+                  : String(taskSummary.activeTasks)
+              }
               subtitle="ongoing assignments"
               accent="from-[#38bdf8] to-[#0ea5e9]"
               icon="✅"
             />
             <MetricCard
               title="Tasks Needing Attention"
-              value="0"
-              subtitle="nearing their due date"
+              value={
+                tasksLoading
+                  ? "—"
+                  : String(taskSummary.needingAttention)
+              }
+              subtitle="near deadlines or changes"
               accent="from-[#facc15] to-[#f97316]"
               icon="⚠️"
             />
@@ -211,7 +285,7 @@ function StudentDashboardInner() {
 
           {/* BOTTOM GRID: MY TASKS + QUICK ACTIONS */}
           <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)] gap-4">
-            {/* LEFT: My Tasks board (4 sections like other screenshot) */}
+            {/* LEFT: My Tasks board */}
             <div className="rounded-2xl border border-slate-900 bg-[#050814] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.9)] space-y-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -222,7 +296,6 @@ function StudentDashboardInner() {
                     View, manage, and remove tasks you&apos;re working on.
                   </p>
                 </div>
-                {/* placeholder for filters later */}
                 <button className="rounded-full border border-slate-800 px-2 py-1 text-[10px] text-slate-400 hover:bg-slate-900/60">
                   Soon: filters
                 </button>
@@ -232,25 +305,49 @@ function StudentDashboardInner() {
                 <TaskColumnCard
                   title="Active"
                   colorDot="bg-sky-400"
-                  countLabel="0 tasks"
+                  countLabel={
+                    tasksLoading
+                      ? "—"
+                      : `${taskSummary.activeTasks} task${
+                          taskSummary.activeTasks === 1 ? "" : "s"
+                        }`
+                  }
                   emptyText="No tasks here yet."
                 />
                 <TaskColumnCard
                   title="Pending"
                   colorDot="bg-amber-400"
-                  countLabel="0 tasks"
+                  countLabel={
+                    tasksLoading
+                      ? "—"
+                      : `${taskSummary.pendingReviews} task${
+                          taskSummary.pendingReviews === 1 ? "" : "s"
+                        }`
+                  }
                   emptyText="No tasks here yet."
                 />
                 <TaskColumnCard
                   title="Approved"
                   colorDot="bg-emerald-400"
-                  countLabel="0 tasks"
+                  countLabel={
+                    tasksLoading
+                      ? "—"
+                      : `${taskSummary.approvedTasks} task${
+                          taskSummary.approvedTasks === 1 ? "" : "s"
+                        }`
+                  }
                   emptyText="No tasks here yet."
                 />
                 <TaskColumnCard
                   title="Other"
                   colorDot="bg-slate-500"
-                  countLabel="0 tasks"
+                  countLabel={
+                    tasksLoading
+                      ? "—"
+                      : `${taskSummary.otherTasks} task${
+                          taskSummary.otherTasks === 1 ? "" : "s"
+                        }`
+                  }
                   emptyText="No tasks here yet."
                 />
               </div>
@@ -311,7 +408,7 @@ function MetricCard({
   return (
     <div className="relative rounded-2xl border border-slate-900 bg-[#050814] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden">
       <div
-        className={`pointer-events-none absolute inset-x-0 -top-10 h-20 bg-linear-to-br ${accent} opacity-30`}
+        className={`pointer-events-none absolute inset-x-0 -top-10 h-20 bg-gradient-to-br ${accent} opacity-30`}
       />
       <div className="relative flex flex-col gap-3">
         <div className="flex items-center justify-between">
