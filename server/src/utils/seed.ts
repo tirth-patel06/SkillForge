@@ -1,5 +1,5 @@
 // src/utils/seed.ts
-import bcrypt from "bcryptjs";
+/*import bcrypt from "bcryptjs";
 import { User } from "../models/User";
 import { Task } from "../models/Task";
 import { Referral } from "../models/Referral";
@@ -45,4 +45,4 @@ export async function seedDemo() {
   console.log("Seeded referrals also")
   console.log("Seed completed");
 }
-
+*/
