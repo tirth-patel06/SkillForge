@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-
+import chatRoutes from "./routes/chatRoutes";
 // Route imports
 import authRoutes from "./routes/authRoutes";
 import studentRoutes from "./routes/studentRoutes";
@@ -13,7 +13,7 @@ import submissionRoutes from "./routes/submissionRoutes";
 import referralRoutes from "./routes/referralRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import studentTaskRoutes from "./routes/studentTaskRoutes";
-
+import teamRoutes from "./routes/teamRoutes";
 const app = express();
 
 const allowedOrigins = ["http://localhost:3000"];
@@ -45,7 +45,8 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/submissions", submissionRoutes); 
 app.use("/api/referrals", referralRoutes);     
 app.use("/api", commentRoutes);
-
+app.use("/api/chat", chatRoutes);
+app.use("/api/teams", teamRoutes);
 // 404 Handler
 app.use((_req, res) => {
   res.status(404).json({ message: "Route not found" });
