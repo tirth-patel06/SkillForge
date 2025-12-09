@@ -300,8 +300,13 @@ export function SubmissionReview() {
         {selectedSubmission ? (
           <div className="p-8 max-w-5xl mx-auto">
             <div className="mb-8">
+              <div className="mb-4 p-4 bg-zinc-900 border border-zinc-800 rounded-lg">
+                <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Task</div>
+                <h2 className="text-2xl font-bold text-blue-400">{selectedSubmission.task_title}</h2>
+              </div>
+
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-3xl font-bold">{selectedSubmission.task_title}</h2>
+                <div className="text-3xl font-bold text-zinc-300">Submission Review</div>
                 <span className="px-3 py-1 bg-orange-500/20 text-orange-300 rounded-lg text-sm font-medium">
                   Version {selectedSubmission.version}
                 </span>
@@ -310,7 +315,7 @@ export function SubmissionReview() {
               <div className="flex items-center space-x-6 text-sm text-zinc-400">
                 <div className="flex items-center">
                   <User className="w-4 h-4 mr-2" />
-                  {selectedSubmission.student_name}
+                  <span className="font-medium">{selectedSubmission.student_name}</span>
                 </div>
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
