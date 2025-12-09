@@ -41,9 +41,23 @@ export async function fetchMyTeams() {
 export async function createTeamApi(data: {
   name: string;
   description?: string;
-  techStack: string;
+  techStack: string | string[];
+  mentorId: string;
 }) {
-  const res = await api.post<{ team: Team }>("/", data);
+  // Ensure techStack is always an array
+  let techStackArr: string[] = [];
+  if (Array.isArray(data.techStack)) {
+    techStackArr = data.techStack;
+  } else if (typeof data.techStack === 'string' && data.techStack.trim().length > 0) {
+    techStackArr = data.techStack.split(',').map(t => t.trim()).filter(Boolean);
+  }
+  // Only send required fields to backend
+  const res = await api.post<{ team: Team }>('/', {
+    name: data.name,
+    description: data.description,
+    techStack: techStackArr,
+    mentor: data.mentorId,
+  });
   return res.data.team;
 }
 

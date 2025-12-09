@@ -549,7 +549,11 @@ function TeamsInnerPage() {
     try {
       setCreating(true);
       setError(null);
-      const team = await createTeamApi(createForm);
+      if (!user?.id) throw new Error("User not found");
+      const team = await createTeamApi({
+        ...createForm,
+        mentorId: user.id,
+      });
       setTeams((prev) => [team, ...prev]);
       setSelectedTeamId(team._id);
       setCreateForm({ name: "", description: "", techStack: "" });

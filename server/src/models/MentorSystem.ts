@@ -161,7 +161,8 @@ SubmissionScoreSchema.index({ criteriaId: 1 });
 
 /*Model exports*/
 
-export const Team: Model<ITeam> = mongoose.model<ITeam>("Team", TeamSchema);
+// Team model is exported from Team.ts instead to avoid conflicts
+// export const Team: Model<ITeam> = mongoose.model<ITeam>("Team", TeamSchema);
 export const RubricCriteria: Model<IRubricCriteria> = mongoose.model<IRubricCriteria>(
   "RubricCriteria",
   RubricCriteriaSchema

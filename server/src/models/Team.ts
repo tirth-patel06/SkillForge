@@ -14,6 +14,7 @@ export interface ITeam extends Document {
   description?: string;
   techStack: string[];
   leader: Types.ObjectId;
+  mentor: Types.ObjectId;
   members: ITeamMember[];
   inviteCode: string;
   createdAt: Date;
@@ -35,6 +36,7 @@ const TeamSchema = new Schema<ITeam>(
     description: { type: String },
     techStack: [{ type: String }],
     leader: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    mentor: { type: Schema.Types.ObjectId, ref: "User", required: true },
     members: { type: [TeamMemberSchema], default: [] },
     inviteCode: { type: String, unique: true, required: true },
   },

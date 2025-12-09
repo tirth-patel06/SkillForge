@@ -46,7 +46,9 @@ export const getMyTeams = async (req: AuthRequest, res: Response) => {
 export const createTeam = async (req: AuthRequest, res: Response) => {
   try {
     const userId = getUserId(req);
-    const { name, description, techStack } = req.body;
+    const { name, description, techStack, mentor } = req.body;
+    console.log("[createTeam] Incoming payload:", { name, description, techStack, mentor });
+    // Ignore any members field from the request body
 
     if (!name) {
       res.status(400).json({ message: "Name is required" });
@@ -67,11 +69,12 @@ export const createTeam = async (req: AuthRequest, res: Response) => {
       tech = techStack.split(",").map((t) => t.trim());
     }
 
-    const team = await Team.create({
+    const teamPayload = {
       name,
       description,
       techStack: tech,
       leader: userId as any,
+      mentor: mentor || userId,
       members: [
         {
           user: userId as any,
@@ -80,14 +83,22 @@ export const createTeam = async (req: AuthRequest, res: Response) => {
         },
       ],
       inviteCode,
-    });
+    };
+    console.log("[createTeam] Team payload to be saved:", teamPayload);
 
-    await populateTeam(team);
-
-    res.status(201).json({ team });
+    try {
+      const team = await Team.create(teamPayload);
+      await populateTeam(team);
+      res.status(201).json({ team });
+    } catch (err) {
+      const errorMsg = (err as any)?.message || "Internal server error";
+      console.error("[createTeam] Mongoose error:", err);
+      res.status(500).json({ message: errorMsg });
+    }
   } catch (err) {
-    console.error("[createTeam] error:", err);
-    res.status(500).json({ message: "Internal server error" });
+    const errorMsg = (err as any)?.message || "Internal server error";
+    console.error("[createTeam] Outer error:", err);
+    res.status(500).json({ message: errorMsg });
   }
 };
 
