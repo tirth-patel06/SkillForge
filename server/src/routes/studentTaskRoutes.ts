@@ -122,7 +122,7 @@ router.post("/:taskId/enroll", async (req: AuthRequest, res) => {
       fileUrls: [],
       files: [],
       notes: undefined,        // will store description later
-      submittedAt: new Date(), // initial enrollment time
+      submittedAt: undefined,  // will be set only when student actually submits
     });
 
     return res.status(201).json({

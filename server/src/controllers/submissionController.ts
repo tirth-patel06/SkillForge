@@ -25,9 +25,10 @@ export const getSubmissions = async (req: AuthRequest, res: Response) => {
     
     if (user.role === "MENTOR") {
       // For mentors: get submissions for tasks they created
+      // Only show submissions that have been actually submitted (submittedAt is set)
       const tasks = await Task.find({ createdBy: userId }).select("_id");
       const taskIds = tasks.map(t => t._id);
-      query = { taskId: { $in: taskIds } };
+      query = { taskId: { $in: taskIds }, submittedAt: { $ne: null } };
     } else {
       // For students: get their own submissions
       query = { $or: [{ studentId: userId }, { reviewedBy: userId }] };
