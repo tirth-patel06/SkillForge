@@ -153,7 +153,13 @@ export const getTaskDetail = async (req: AuthRequest, res: Response) => {
         status: s.status,
         submittedAt: s.submittedAt,
       })),
-      rubric: rubric.length > 0 ? { criteria: rubric } : undefined,
+      rubric: rubric.length > 0 ? { 
+        criteria: rubric.map((r: any) => ({
+          name: r.name,
+          maxPoints: r.weightage,
+          description: r.description,
+        }))
+      } : undefined,
       createdAt: task.createdAt,
       updatedAt: task.updatedAt,
     };
