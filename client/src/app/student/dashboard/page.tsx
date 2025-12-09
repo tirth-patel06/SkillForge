@@ -149,7 +149,7 @@ function StudentDashboardInner() {
         <div className="px-4 pb-4 pt-2 border-t border-slate-900">
           {user && (
             <div className="mb-3 flex items-center gap-3 rounded-xl bg-slate-900/70 px-3 py-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-emerald-400 text-xs font-semibold text-slate-950">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-sky-500 to-emerald-400 text-xs font-semibold text-slate-950">
                 {(user.name || user.email || "?").charAt(0).toUpperCase()}
               </div>
               <div className="flex-1">
@@ -408,7 +408,7 @@ function MetricCard({
   return (
     <div className="relative rounded-2xl border border-slate-900 bg-[#050814] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden">
       <div
-        className={`pointer-events-none absolute inset-x-0 -top-10 h-20 bg-gradient-to-br ${accent} opacity-30`}
+        className={`pointer-events-none absolute inset-x-0 -top-10 h-20 bg-linear-to-br ${accent} opacity-30`}
       />
       <div className="relative flex flex-col gap-3">
         <div className="flex items-center justify-between">
