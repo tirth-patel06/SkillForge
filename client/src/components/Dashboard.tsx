@@ -33,6 +33,11 @@ export function Dashboard() {
 
   useEffect(() => {
     loadDashboardStats();
+    // Auto-refresh dashboard every 30 seconds
+    const interval = setInterval(() => {
+      loadDashboardStats();
+    }, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   async function loadDashboardStats() {

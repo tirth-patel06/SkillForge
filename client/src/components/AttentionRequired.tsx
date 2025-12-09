@@ -88,11 +88,14 @@ export function AttentionRequired({ onBack }: { onBack?: () => void }) {
         criticalReason: resolveModal?.criticalReason,
       });
 
-      // Remove task from list
+      // Remove task from list and reload to ensure dashboard is updated
       setTasks(tasks.filter((t) => t.id !== resolveModal?.taskId));
       setResolveModal(null);
       setResolutionNotes("");
       setError(null);
+      
+      // Refetch critical tasks to ensure we have the latest data
+      await loadCriticalTasks();
     } catch (err) {
       const error = err as { response?: { data?: { message?: string } } };
       setError(error?.response?.data?.message || "Failed to resolve issue");

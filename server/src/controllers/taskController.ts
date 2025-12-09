@@ -9,14 +9,19 @@ const calculateAttentionStatus = (task: any, submissions: any[]) => {
     (new Date().getTime() - new Date(task.createdAt).getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  // REJECTED status - Critical
+  // If task has been resolved, don't show as critical anymore
+  if (task.resolvedAt) {
+    return null;
+  }
+
+  // REJECTED status - Critical (but only if not resolved)
   if (task.status === "REJECTED") {
     return { level: "critical", reason: "Task rejected by admin - needs revision" };
   }
 
   if (task.status === "ACTIVE") {
     // Count unreviewed submissions
-    const unreviewed = submissions.filter((s) => s.status === "PENDING").length;
+    const unreviewed = submissions.filter((s) => s.status === "PENDING" && s.submittedAt).length;
     
     // Critical: 5+ unreviewed submissions
     if (unreviewed >= 5) {
@@ -81,7 +86,7 @@ export const getMyTasks = async (req: AuthRequest, res: Response) => {
     const formatted = await Promise.all(
       tasks.map(async (t) => {
         const submissions = await Submission.find({ taskId: t._id }).lean();
-        const unreviewed = submissions.filter((s) => s.status === "PENDING").length;
+        const unreviewed = submissions.filter((s) => s.status === "PENDING" && s.submittedAt).length;
         const attention = calculateAttentionStatus(t, submissions);
 
         return {
