@@ -60,6 +60,9 @@ export const getSubmissions = async (req: AuthRequest, res: Response) => {
       submitted_at: sub.submittedAt?.toISOString() || new Date().toISOString(),
       student_name: (sub as any).studentId?.name || 'Unknown',
       task_title: (sub as any).taskId?.title || 'Unknown Task',
+      review: sub.review ? {
+        feedback: sub.review.feedback || '',
+      } : undefined,
     }));
 
     return res.status(200).json(formattedSubmissions);
@@ -184,6 +187,40 @@ export const submitReview = async (req: AuthRequest, res: Response) => {
     });
   } catch (error) {
     console.error("Submit review error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// GET /submissions/:id/scores - Get scores for a specific submission
+export const getSubmissionScores = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: "Submission ID is required" });
+    }
+
+    // Get submission to verify it exists
+    const submission = await Submission.findById(id);
+    if (!submission) {
+      return res.status(404).json({ message: "Submission not found" });
+    }
+
+    // Get all scores for this submission
+    const scores = await SubmissionScore.find({ submissionId: id })
+      .select("criteriaId score feedback")
+      .lean();
+
+    // Map to frontend format
+    const formattedScores = scores.map(s => ({
+      criteriaId: s.criteriaId.toString(),
+      score: s.score,
+      feedback: s.feedback || "",
+    }));
+
+    return res.status(200).json(formattedScores);
+  } catch (error) {
+    console.error("Get submission scores error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };

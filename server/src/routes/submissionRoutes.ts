@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth";
-import { getSubmissions, submitReview } from "../controllers/submissionController";
+import { getSubmissions, submitReview, getSubmissionScores } from "../controllers/submissionController";
 
 const router = Router();
 
@@ -9,6 +9,9 @@ router.use(authMiddleware);
 
 // Get all submissions for current user
 router.get("/", getSubmissions);
+
+// Get scores for a specific submission
+router.get("/:id/scores", getSubmissionScores);
 
 // Submit review for a submission
 router.post("/:id/review", submitReview);

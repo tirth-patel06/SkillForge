@@ -122,7 +122,9 @@ export function MentorLayout({ children, currentPage, onNavigate, user, onLogout
               </div>
             </div>
           </Link>
-        </div>        <div className="p-4 border-t border-zinc-800 space-y-3">
+        </div>
+
+        <div className="p-4 border-t border-zinc-800 space-y-3">
           {/* Profile Section */}
           <Link href="/mentor/profile">
             <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-zinc-900/50 hover:bg-zinc-800/50 transition-colors cursor-pointer">
