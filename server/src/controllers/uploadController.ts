@@ -1,6 +1,6 @@
 import type { Response } from "express";
 import type { AuthRequest } from "../types/auth";
-import { uploadToCloudinary } from "../lib/cloudinaryUpload";
+import { uploadBufferToCloudinary } from "../lib/cloudinaryUpload";
 
 export const uploadMentorProfileImage = async (
   req: AuthRequest,
@@ -22,7 +22,7 @@ export const uploadMentorProfileImage = async (
     console.log("  Starting Cloudinary upload...");
 
     // Upload to Cloudinary
-    const imageUrl = await uploadToCloudinary(
+    const imageUrl = await uploadBufferToCloudinary(
       req.file.buffer,
       `mentor-${req.user.id}-${Date.now()}`,
       "mentor-profiles"
