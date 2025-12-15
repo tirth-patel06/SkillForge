@@ -1,7 +1,7 @@
 // server/src/server.ts
 import dotenv from "dotenv";
 dotenv.config();
-
+import { Team } from "./models/Team";
 import http from "http";
 import mongoose from "mongoose";
 import app from "./app";
@@ -56,6 +56,11 @@ process.on("uncaughtException", (err) => {
   console.error("🔴 Uncaught Exception:", err);
   process.exit(1);
 });
+setInterval(async () => {
+  await Team.updateMany({}, {
+    inviteCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
+  });
+}, 5 * 60 * 1000);
 
 // ----------------------------
 // START THE SERVER

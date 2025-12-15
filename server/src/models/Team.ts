@@ -1,14 +1,11 @@
 // server/src/models/Team.ts
 import mongoose, { Schema, Document, Types } from "mongoose";
-
 export type TeamMemberRole = "LEADER" | "MEMBER";
-
 export interface ITeamMember {
   user: Types.ObjectId;
   role: TeamMemberRole;
   joinedAt: Date;
 }
-
 export interface ITeam extends Document {
   name: string;
   description?: string;
@@ -20,7 +17,6 @@ export interface ITeam extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
-
 const TeamMemberSchema = new Schema<ITeamMember>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -29,16 +25,15 @@ const TeamMemberSchema = new Schema<ITeamMember>(
   },
   { _id: false }
 );
-
 const TeamSchema = new Schema<ITeam>(
   {
     name: { type: String, required: true },
     description: { type: String },
     techStack: [{ type: String }],
     leader: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    mentor: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    mentor: { type: Schema.Types.ObjectId, ref: "User", required: false },
     members: { type: [TeamMemberSchema], default: [] },
-    inviteCode: { type: String, unique: true, required: true },
+    inviteCode: { type: String, unique: true },
   },
   { timestamps: true }
 );

@@ -1,17 +1,21 @@
-// client/src/lib/socket.ts
 "use client";
 
 import { io, Socket } from "socket.io-client";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const RAW_API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+// 🔥 strip /api for socket connection
+const SOCKET_URL = RAW_API_URL.replace(/\/api$/, "");
 
 let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (!socket) {
-    socket = io(API_URL, {
+    socket = io(SOCKET_URL, {
       withCredentials: true,
       transports: ["websocket"],
+      autoConnect: true, // safe default
     });
 
     socket.on("connect", () => {
@@ -22,5 +26,6 @@ export function getSocket(): Socket {
       console.error("❌ client socket connect_error:", err.message);
     });
   }
+
   return socket;
 }

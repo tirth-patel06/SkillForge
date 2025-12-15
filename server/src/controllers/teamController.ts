@@ -291,6 +291,37 @@ export const transferLeadership = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+//regenerate invite code
+export const regenerateInviteCode = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = getUserId(req);
+    const { teamId } = req.params;
+
+    const team = await Team.findById(teamId);
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    if (team.leader.toString() !== userId) {
+      return res.status(403).json({ message: "Only leader can regenerate code" });
+    }
+
+    let newCode: string;
+    while (true) {
+      newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const exists = await Team.findOne({ inviteCode: newCode });
+      if (!exists) break;
+    }
+
+    team.inviteCode = newCode;
+    await team.save();
+
+    res.json({ inviteCode: newCode });
+  } catch (err) {
+    console.error("[regenerateInviteCode] error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 // POST /api/teams/:teamId/leave
 export const leaveTeam = async (req: AuthRequest, res: Response) => {
