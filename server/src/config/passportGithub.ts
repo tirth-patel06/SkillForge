@@ -1,21 +1,20 @@
 // server/src/config/passportGithub.ts
 
 import passport from "passport";
-// Remove or comment out GitHub import temporarily
-// import { Strategy as GitHubStrategy } from "passport-github2";
+import { Strategy as GitHubStrategy } from "passport-github2";
 import { User } from "../models/User";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-console.log("⚠️ GitHub auth temporarily disabled for development");
+//console.log("⚠️ GitHub auth temporarily disabled for development");
 
 
-`const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID!;
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID!;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET!;
 const GITHUB_CALLBACK_URL =
   process.env.GITHUB_CALLBACK_URL ||
-  "http://localhost:3000/api/auth/github/callback";
+  "http://localhost:8000/api/auth/github/callback";
 
 // IMPORTANT: Do NOT type the callback parameters with strict types.
 //            Passport's TypeScript definitions conflict and cause errors.
@@ -60,5 +59,5 @@ passport.use(
     }
   )
 );
-`
+
 export default passport;

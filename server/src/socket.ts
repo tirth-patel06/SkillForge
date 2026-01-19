@@ -2,12 +2,22 @@
 import http from "http";
 import { Server } from "socket.io";
 import { ChatMessage } from "./models/ChatMessage";
-
+import Contribution from "./models/Contribution";
 // teamId -> set of userIds currently online in that team
+let io: Server | null = null;
 const teamOnline = new Map<string, Set<string>>();
+// export const emitContributionUpdate = (io, userId: string) => {
+//   io.to(userId).emit("contribution:update");
+// };
+export const emitContributionUpdate = (
+  io: Server,
+  userId: string
+) => {
+  io.to(userId).emit("contribution:update");
+};
 
 export function initSocket(server: http.Server) {
-  const io = new Server(server, {
+  io = new Server(server, {
     cors: {
       origin: process.env.FRONTEND_URL || "http://localhost:3000",
       credentials: true,
@@ -16,6 +26,10 @@ export function initSocket(server: http.Server) {
 
   io.on("connection", (socket) => {
     console.log("🔌 Socket connected:", socket.id);
+    socket.on("join:user", (userId: string) => {
+    if (!userId) return;
+    socket.join(String(userId));
+    });
 
     // which teams this socket joined
     const joinedTeams = new Set<string>();
@@ -117,6 +131,22 @@ export function initSocket(server: http.Server) {
             sender: data.sender.id,
             content: text,
           });
+          // here 
+          // ---- Log contribution for sending a message ----
+          await Contribution.create({
+            user: msg.sender, // ObjectId from Mongo doc
+            type: "MESSAGE",
+            description: "Sent a team message",
+            points: 1,
+          });
+
+          // realtime notify sender
+          if (io) {
+            io
+              .to(msg.sender.toString())
+              .emit("contribution:update");
+          }
+
 
           const payload = {
             _id: msg._id.toString(),
@@ -132,6 +162,7 @@ export function initSocket(server: http.Server) {
           };
 
           // broadcast to EVERY socket in this team (including sender)
+          if (!io) return;
           io.to(room).emit("teamMessage", payload);
           console.log(
             "[socket teamMessage] stored & emitted",
@@ -166,5 +197,12 @@ export function initSocket(server: http.Server) {
     });
   });
 
+  return io;
+}
+
+export function getIO(): Server {
+  if (!io) {
+    throw new Error("Socket.io not initialized. Call initSocket() first.");
+  }
   return io;
 }
