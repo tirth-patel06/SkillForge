@@ -1,33 +1,46 @@
+// client/src/app/github-callback/page.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext"; // adjust alias if needed
+import { useAuth } from "@/context/AuthContext";
 import { meApi } from "@/api/auth";
 
 export default function GithubCallbackPage() {
   const router = useRouter();
   const { setUser } = useAuth();
-  const [done, setDone] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
         const params = new URLSearchParams(window.location.search);
         const token = params.get("token");
+
         if (token) {
           localStorage.setItem("token", token);
-          // optionally set Authorization header globally if needed
         }
-        const res = await meApi();
-        setUser(res.data.user);
+
+        const user = await meApi(); // your meApi returns user
+        setUser(user);
+
+        // ✅ ROLE-BASED REDIRECT
+        if (user.role === "MENTOR") {
+          router.replace("/mentor/dashboard");
+        } 
+        if (user.role === "STUDENT") {
+          router.replace("/student/dashboard");
+        } 
+        if (user.role === "ADMIN") {
+          router.replace("/admin/dashboard");
+        } 
+        else {
+          router.replace("student/dashboard");
+        }
       } catch (err) {
         console.error("GitHub callback failed", err);
-      } finally {
-        setDone(true);
-        router.replace("/dashboard");
+        router.replace("/auth");
       }
     })();
   }, [router, setUser]);
 
-  return <div>{done ? "Redirecting..." : "Finishing GitHub login..."}</div>;
+  return <div>Finishing GitHub login...</div>;
 }
