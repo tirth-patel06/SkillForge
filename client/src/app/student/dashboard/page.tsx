@@ -1,3 +1,4 @@
+// client/src/app/student/dashboard/page.tsx
 "use client";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -6,7 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { meApi, logoutApi, type User } from "@/api/auth";
 import { fetchEnrolledTasks, EnrolledTaskItem } from "@/api/studentTasks";
-
+import ContributionDashboard from "@/components/contribution/ContributionDashboard";
 function StudentDashboardInner() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,6 +108,7 @@ function StudentDashboardInner() {
     { label: "Teams", href: "/student/teams", icon: "👥" },
     { label: "Profile", href: "/student/profile", icon: "👤" },
     { label: "Referrals", href: "/student/referrals", icon: "✉️" },
+    { label: "Contributions", href: "/student/contribution", icon: "🌱" }
   ];
 
   return (
@@ -282,7 +284,7 @@ function StudentDashboardInner() {
               />
             </div>
           </section>
-
+          <ContributionDashboard />
           {/* BOTTOM GRID: MY TASKS + QUICK ACTIONS */}
           <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)] gap-4">
             {/* LEFT: My Tasks board */}
@@ -521,6 +523,39 @@ function QuickActionRow({
       </div>
       <p className="text-[11px] text-slate-500">{description}</p>
     </Link>
+  );
+}
+function ContributionStat({
+  title,
+  value,
+  subtitle,
+  accent,
+  icon,
+}: {
+  title: string;
+  value: string;
+  subtitle: string;
+  accent: string;
+  icon: string;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-slate-900 bg-[#050814] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.9)] hover:-translate-y-[1px] transition">
+      <div
+        className={`pointer-events-none absolute inset-x-0 -top-10 h-20 bg-linear-to-br ${accent} opacity-30`}
+      />
+
+      <div className="relative flex items-center justify-between">
+        <div className="space-y-1">
+          <p className="text-xs text-slate-400">{title}</p>
+          <p className="text-xl font-semibold text-slate-50">{value}</p>
+          <p className="text-[11px] text-slate-500">{subtitle}</p>
+        </div>
+
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/60 border border-white/10 text-lg">
+          {icon}
+        </div>
+      </div>
+    </div>
   );
 }
 
