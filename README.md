@@ -606,11 +606,6 @@ For support, open an issue on the [GitHub Issues page](https://github.com/anushk
 - **Cloudinary**: [Sign Up & Dashboard](https://cloudinary.com)
 - **MongoDB Atlas**: [Cloud Database](https://www.mongodb.com/cloud)
 
-## 📞 Contact
-
-For questions or feedback, reach out to the team:
-- **Anushka Gupta**: [GitHub Profile](https://github.com/anushkagupta-06)
-
 ---
 
 **Made with ❤️ by the Eleven's squad Team**
