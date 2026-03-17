@@ -20,7 +20,7 @@ export const getMyProfile = async (req: AuthRequest, res: Response) => {
     }
 
     // Find the base user
-    const user = await User.findById(req.user.id).select("name email role");
+    const user = await User.findById(String(req.params.id)).select("name email role");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
