@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Task } from "../models/Task";
 import { User } from "../models/User";
-import { Referral } from "../models/Refferal";
+import { Referral } from "../models/Referral";
 
 interface StatsResponse {
   users: number;
