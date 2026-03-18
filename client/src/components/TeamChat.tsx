@@ -1,3 +1,4 @@
+// client/src/components/TeamChat.tsx
 "use client";
 
 import { useEffect, useState, useRef, KeyboardEventHandler } from "react";
@@ -25,6 +26,27 @@ export default function TeamChat({ teamId }: Props) {
       .catch((err) => console.error("Failed to fetch team messages", err))
       .finally(() => setLoading(false));
   }, [teamId]);
+
+  
+  // 🔌 JOIN / LEAVE TEAM SOCKET ROOM (COMMENTED OUT FOR NOW)
+  useEffect(() => {
+    if (!teamId || !user) return;
+
+    const socket = getSocket();
+
+    socket.emit("joinTeam", {
+      teamId,
+      userId: user.id,
+    });
+
+    return () => {
+      socket.emit("leaveTeam", {
+        teamId,
+        userId: user.id,
+      });
+    };
+  }, [teamId, user]);
+  
 
   // listen for realtime messages
   useEffect(() => {

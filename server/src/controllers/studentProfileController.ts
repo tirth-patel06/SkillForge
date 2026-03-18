@@ -137,12 +137,12 @@ export const updateMyProfile = async (req: AuthRequest, res: Response) => {
  */
 export const getPublicProfile = async (req: AuthRequest, res: Response) => {
     try {
-      const { id } = req.params;
-  
+      const id = String(req.params.id);
+
       if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: "Invalid user id" });
       }
-  
+
       // Find the base user (only student type)
       const user = await User.findById(id).select("name email role");
       if (!user) {

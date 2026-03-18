@@ -27,3 +27,6 @@ coverage
 
 # Mac
 .DS_Store
+
+#untracked files
+server/public/referrals/

@@ -1,6 +1,6 @@
 // src/routes/referrals.ts
 import express from "express";
-import { Referral } from "../models/Refferal";
+import { Referral } from "../models/Referral";
 import { User } from "../models/User";
 import { signJwt } from "../utils/createJwt";
 //import { createReferralPdf } from "../utils/pdf";

@@ -7,6 +7,12 @@ export const api = axios.create({
 
 // attach JWT from localStorage if present
 api.interceptors.request.use((config) => {
+  if (config.headers) {
+    delete config.headers["cache-control"];
+    delete config.headers["Cache-Control"];
+    delete config.headers["pragma"];
+    delete config.headers["Pragma"];
+  }
   if (typeof window !== "undefined") {
     // Prefer cookies for auth, only use localStorage if cookie is missing
     const hasCookie = document.cookie && document.cookie.includes("token");

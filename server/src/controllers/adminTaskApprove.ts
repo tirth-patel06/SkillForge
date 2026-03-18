@@ -21,7 +21,7 @@ router.post("/:id/moderate", requireAuth, requireAdmin, async (req, res) => {
   const { action, reason } = req.body;
   const adminId = req.user?.id; // from middleware
 
-  const task = await Task.findById(req.params.id);
+  const task = await Task.findById(String(req.params.id));
   if (!task) return res.status(404).json({ error: "Task not found" });
 
   if (action === "approve") task.status = "ACTIVE";

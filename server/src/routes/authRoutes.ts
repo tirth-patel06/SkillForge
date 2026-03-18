@@ -28,7 +28,7 @@ router.get(
   passport.authenticate("github", {
     session: false,
     failureRedirect:
-      (process.env.FRONTEND_URL || "http://localhost:5173") +
+      (process.env.FRONTEND_URL || "http://localhost:3000") +
       "/auth?error=github",
   }),
   githubCallbackHandler

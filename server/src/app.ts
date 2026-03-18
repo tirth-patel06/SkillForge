@@ -18,7 +18,7 @@ import studentTaskRoutes from "./routes/studentTaskRoutes";
 import teamRoutes from "./routes/teamRoutes";
 import adminReferralRoutes from './controllers/adminReferralApproval'
 import adminTaskRoutes from './controllers/adminTaskApprove'
-
+import contributionRoutes from "./routes/contribution.routes";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -45,6 +45,7 @@ app.use(morgan("dev"));
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok" });
 });
+app.use("/api/contributions", contributionRoutes);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/mentors", mentorRoutes);           
@@ -56,7 +57,7 @@ app.use("/api/referrals", referralRoutes);
 app.use("/api", commentRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/teams", teamRoutes);
-
+app.use("/api/contributions", contributionRoutes);
 app.use('/api/admin/tasks',adminTaskRoutes)
 app.use('/api/admin/referrals',adminReferralRoutes)
 // 404 Handler

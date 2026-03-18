@@ -24,10 +24,17 @@ const AuthPage: React.FC = () => {
 
   // If already logged in, redirect to dashboard (client-side)
   useEffect(() => {
-    if (user) {
-      router.replace("/dashboard");
-    }
-  }, [user, router]);
+  if (!user) return;
+
+  if (user.role === "STUDENT") {
+    router.replace("/student/dashboard");
+  } else if (user.role === "MENTOR") {
+    router.replace("/mentor/dashboard");
+  } else if (user.role === "ADMIN") {
+    router.replace("/admin/dashboard");
+  }
+}, [user, router]);
+
 
   // while redirecting don't render the page
   if (user) return null; // already redirecting

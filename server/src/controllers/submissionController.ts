@@ -4,7 +4,9 @@ import { Submission, RubricCriteria, SubmissionScore } from "../models/MentorSys
 import { Task } from "../models/Task";
 import { User } from "../models/User";
 import mongoose from "mongoose";
-
+import Contribution from "../models/Contribution";
+import { emitContributionUpdate } from "../socket";
+import { getIO } from "../socket";
 // GET /submissions - Get all submissions for current user
 export const getSubmissions = async (req: AuthRequest, res: Response) => {
   try {
@@ -148,10 +150,58 @@ export const submitReview = async (req: AuthRequest, res: Response) => {
       submission.review = { scores: new Map(), feedback: "" };
     }
     submission.review.feedback = feedback || "";
-
     await submission.save();
+    if (submission.studentId) {
+    
+    const totalScore = Array.isArray(scores)
+    ? scores.reduce((sum, s) => sum + (s.score ?? 0), 0)
+    : 0;
 
-    // Save scores for each criteria if provided
+    await Contribution.create({
+      user: submission.studentId, // ✅ correct field
+      type: "REVIEW",
+      description: "Mentor scored your submission",
+      points: totalScore,
+    });
+
+    // realtime notify student
+    getIO()
+      .to(submission.studentId.toString())
+      .emit("contribution:update");
+  }
+    
+  // Fetch the task to get points
+    const taskData = await Task.findById(submission.taskId);
+    
+    await Contribution.create({
+    user: submission.studentId,
+    type: "TASK",
+    description: `Completed task`,
+    points: 10,
+  });
+  console.log("🔥 Emitting contribution update");
+  // realtime notify
+  if (submission.studentId) {
+    getIO().to(submission.studentId.toString()).emit("contribution:update");
+  }
+    // Log contribution for student
+//     if (!task) {
+//   return res.status(404).json({ message: "Task not found" });
+// }
+
+//   const contribution = await Contribution.create({
+//     user: submission.studentId as Types.ObjectId,
+//     type: "TASK",
+//     description: `Completed task: ${task.title}`,
+//     points: task.points ?? 10,
+//   });
+
+//   emitContributionUpdate(
+//     submission.studentId.toString(),
+//     contribution.toObject()
+// );
+
+
     if (scores && Array.isArray(scores)) {
       for (const score of scores) {
         const existingScore = await SubmissionScore.findOne({

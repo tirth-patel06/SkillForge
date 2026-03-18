@@ -70,6 +70,12 @@ export async function getTeamApi(teamId: string) {
   const res = await api.get<{ team: Team }>(`/${teamId}`);
   return res.data.team;
 }
+export async function regenerateInviteCodeApi(teamId: string) {
+  const res = await api.post<{ inviteCode: string }>(
+    `/${teamId}/regenerate-invite`
+  );
+  return res.data.inviteCode;
+}
 
 export async function updateTeamApi(teamId: string, data: {
   name?: string;

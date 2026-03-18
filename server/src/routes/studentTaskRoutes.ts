@@ -88,13 +88,13 @@ router.get("/active", async (req: AuthRequest, res) => {
 router.post("/:taskId/enroll", async (req: AuthRequest, res) => {
   try {
     const user = req.user!;
-    const { taskId } = req.params;
+    const taskId = String(req.params.taskId);
 
     if (!mongoose.Types.ObjectId.isValid(taskId)) {
       return res.status(400).json({ message: "Invalid task id" });
     }
 
-    const task = await Task.findById(taskId);
+    const task = await Task.findById(String(taskId));
     if (!task || task.status !== "ACTIVE") {
       return res
         .status(400)
@@ -103,7 +103,7 @@ router.post("/:taskId/enroll", async (req: AuthRequest, res) => {
 
     // Check if already have a submission for this task
     const existing = await Submission.findOne({
-      taskId,
+      taskId: String(taskId),
       studentId: user.id,
     });
 
@@ -185,7 +185,7 @@ router.get("/enrolled", async (req: AuthRequest, res) => {
 router.post("/:taskId/submit", async (req: AuthRequest, res) => {
   try {
     const user = req.user!;
-    const { taskId } = req.params;
+    const taskId = String(req.params.taskId);
     const { githubUrl, description } = req.body as {
       githubUrl: string;
       description: string;
@@ -203,14 +203,14 @@ router.post("/:taskId/submit", async (req: AuthRequest, res) => {
 
     // Find existing submission (enrollment)
     let submission = await Submission.findOne({
-      taskId,
+      taskId: String(taskId),
       studentId: user.id,
     });
 
     if (!submission) {
       // if student never enrolled, create a new submission now
       submission = new Submission({
-        taskId,
+        taskId: String(taskId),
         studentId: user.id,
         fileUrls: [],
         files: [],

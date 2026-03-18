@@ -11,11 +11,12 @@ import {
   transferLeadership,
   leaveTeam,
 } from "../controllers/teamController";
-
+import { regenerateInviteCode } from "../controllers/teamController";
 const router = Router();
 
 // all team routes require auth
 router.use(requireAuth);
+router.post("/:teamId/regenerate-invite", regenerateInviteCode);
 
 router.get("/my", getMyTeams);
 router.post("/", createTeam);
