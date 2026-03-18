@@ -88,7 +88,7 @@ router.get("/active", async (req: AuthRequest, res) => {
 router.post("/:taskId/enroll", async (req: AuthRequest, res) => {
   try {
     const user = req.user!;
-    const { taskId } = req.params;
+    const taskId = String(req.params.taskId);
 
     if (!mongoose.Types.ObjectId.isValid(taskId)) {
       return res.status(400).json({ message: "Invalid task id" });
@@ -185,7 +185,7 @@ router.get("/enrolled", async (req: AuthRequest, res) => {
 router.post("/:taskId/submit", async (req: AuthRequest, res) => {
   try {
     const user = req.user!;
-    const { taskId } = req.params;
+    const taskId = String(req.params.taskId);
     const { githubUrl, description } = req.body as {
       githubUrl: string;
       description: string;
