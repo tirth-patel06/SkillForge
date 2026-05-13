@@ -140,7 +140,7 @@ export const getMentorDashboard = async (req: AuthRequest, res: Response) => {
         id: sub._id.toString(),
         student_name: (sub as any).studentId?.name ?? "Unknown",
         task_title: (sub as any).taskId?.title ?? "Unknown Task",
-        submitted_at: sub.submittedAt.toISOString(),
+        submitted_at: sub.submittedAt!.toISOString(),
       })),
       taskProgress: [], // fill with analytics later
     };
