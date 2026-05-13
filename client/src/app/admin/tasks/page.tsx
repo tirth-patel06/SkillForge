@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { api } from "@/lib/api";
 import { meApi } from "@/api/auth";
-
-const API_URL =  "http://localhost:8000";
 
 export default function AdminTasksPage() {
   const [user, setUser] = useState<any>(null);
@@ -24,9 +22,7 @@ export default function AdminTasksPage() {
   // Load pending tasks
   async function loadTasks() {
     try {
-      const res = await axios.get(`${API_URL}/api/admin/tasks?status=PENDING`, {
-        withCredentials: true,
-      });
+      const res = await api.get("/admin/tasks?status=PENDING");
       setTasks(res.data.tasks || res.data);
     } catch (err) {
       console.error(err);
@@ -36,8 +32,8 @@ export default function AdminTasksPage() {
   // Moderate
   async function moderate(id: string, action: string) {
     try {
-      await axios.post(
-        `${API_URL}/api/admin/tasks/${id}/moderate`,
+      await api.post(
+        `/admin/tasks/${id}/moderate`,
         {
           action,
           reason: action === "reject" ? "Not clear" : "",

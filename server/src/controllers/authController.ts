@@ -6,8 +6,15 @@ import { User } from "../models/User";
 import { JwtPayload } from "../types/auth";
 import { sendOtpEmail } from "../lib/sendEmail";
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 const JWT_EXPIRES = "7d";
+
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET is not set");
+  }
+  return secret;
+}
 
 function createJwt(user: any): string {
   const payload: JwtPayload = {
@@ -17,14 +24,15 @@ function createJwt(user: any): string {
     name: user.name,
     verified: user.verified,
   };
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: JWT_EXPIRES });
 }
 
 function setAuthCookie(res: Response, token: string) {
+  const isProd = process.env.NODE_ENV === "production";
   res.cookie("token", token, {
     httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    sameSite: isProd ? "none" : "lax",
+    secure: isProd,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 }
@@ -61,8 +69,9 @@ export const register = async (req: Request, res: Response) => {
       otpExpiresAt,
     });
 
-    // Log OTP for development so you can test without real email
-    console.log(`🔐 OTP for ${user.email}: ${otp}`);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`🔐 OTP for ${user.email}: ${otp}`);
+    }
 
     // Fire-and-forget email sending; do NOT block or crash signup
     sendOtpEmail(user.email, otp).catch((err) => {
@@ -183,7 +192,12 @@ export const me = (req: Request, res: Response) => {
 
 // POST /api/auth/logout
 export const logout = (req: Request, res: Response) => {
-  res.clearCookie("token");
+  const isProd = process.env.NODE_ENV === "production";
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: isProd ? "none" : "lax",
+    secure: isProd,
+  });
   res.json({ message: "Logged out" });
 };
 
@@ -191,8 +205,16 @@ export const logout = (req: Request, res: Response) => {
 export const githubCallbackHandler = (req: Request, res: Response) => {
   const user = req.user as any;
   const token = createJwt(user);
-  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+  const frontendUrl =
+    process.env.FRONTEND_URL ||
+    process.env.CLIENT_URL ||
+    "http://localhost:3000";
 
-  // easiest: send token to frontend in query param
+  setAuthCookie(res, token);
+  if (process.env.NODE_ENV === "production") {
+    res.redirect(`${frontendUrl}/github-callback`);
+    return;
+  }
+
   res.redirect(`${frontendUrl}/github-callback?token=${token}`);
 };

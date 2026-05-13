@@ -15,26 +15,23 @@ export default function GithubCallbackPage() {
         const params = new URLSearchParams(window.location.search);
         const token = params.get("token");
 
-        if (token) {
+        if (token && process.env.NODE_ENV !== "production") {
           localStorage.setItem("token", token);
         }
 
         const user = await meApi(); // your meApi returns user
         setUser(user);
 
-        // ✅ ROLE-BASED REDIRECT
-        if (user.role === "MENTOR") {
-          router.replace("/mentor/dashboard");
-        } 
-        if (user.role === "STUDENT") {
-          router.replace("/student/dashboard");
-        } 
-        if (user.role === "ADMIN") {
-          router.replace("/admin/dashboard");
-        } 
-        else {
-          router.replace("student/dashboard");
-        }
+        const target =
+          user.role === "MENTOR"
+            ? "/mentor/dashboard"
+            : user.role === "STUDENT"
+            ? "/student/dashboard"
+            : user.role === "ADMIN"
+            ? "/admin/dashboard"
+            : "/auth";
+
+        router.replace(target);
       } catch (err) {
         console.error("GitHub callback failed", err);
         router.replace("/auth");

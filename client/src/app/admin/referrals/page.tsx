@@ -2,10 +2,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { api } from "@/lib/api";
 import { meApi } from "@/api/auth";
-
-const API_URL = "http://localhost:8000";
 
 export default function AdminReferralsPage() {
   const [user, setUser] = useState<any>(null);
@@ -25,11 +23,9 @@ export default function AdminReferralsPage() {
 
   async function loadRefs() {
     try {
-      const res = await axios.get(`${API_URL}/api/admin/referrals?status=PENDING`, {
-        withCredentials: true,
-      });
+      const res = await api.get("/admin/referrals?status=PENDING");
       const payload = res.data;
-  
+
       setRefs(payload.refs ?? payload);
     } catch (err) {
       console.error("Failed to load referrals", err);
@@ -39,10 +35,9 @@ export default function AdminReferralsPage() {
   async function approve(id: string) {
     try {
       setActionLoading((s) => ({ ...s, [id]: true }));
-      const res = await axios.patch(
-        `${API_URL}/api/admin/referrals/${id}/approve`,
-        { note: "Approved by admin" },
-        { withCredentials: true }
+      const res = await api.patch(
+        `/admin/referrals/${id}/approve`,
+        { note: "Approved by admin" }
       );
       const data = res.data;
       const pdfUrl = null

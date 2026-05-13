@@ -9,7 +9,7 @@ import type {
   ProfileVisibility,
 } from "@/types/studentProfile";
 
-const API_BASE_URL = "http://localhost:8000"; // or from env later
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const emptyProfile: StudentProfile = {
   bio: "",
