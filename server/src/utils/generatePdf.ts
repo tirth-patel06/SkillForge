@@ -69,7 +69,6 @@ export async function createReferralPdf(referralData: {
 
     doc.end();
  stream.on("finish", async() => {
-      const publicUrl = `/referrals/${filename}`;
        let cloudUrl: string | null = null;
       try {
         const result = await cloudinary.uploader.upload(filePath, {
@@ -78,11 +77,22 @@ export async function createReferralPdf(referralData: {
           public_id: `referral_${Date.now()}`,
         });
 
-        cloudUrl = result.secure_url;
+        cloudUrl = cloudinary.url(result.public_id, {
+          resource_type: "raw",
+          format: "pdf",
+          secure: true,
+          flags: "attachment",
+        });
       } catch (err) {
         console.error("Cloudinary upload failed:", err);
 
         cloudUrl = "";
+      }
+
+      try {
+        fs.unlinkSync(filePath);
+      } catch (e) {
+        console.error("Failed to delete local PDF:", e);
       }
 
       resolve(cloudUrl);
