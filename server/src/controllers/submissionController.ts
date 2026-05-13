@@ -163,15 +163,15 @@ export const submitReview = async (req: AuthRequest, res: Response) => {
 
   }
     
-  // Fetch the task to get points
-    const taskData = await Task.findById(submission.taskId);
-    
+  // Award points ONLY if submission is APPROVED
+  if (status === "APPROVED") {
     await Contribution.create({
-    user: submission.studentId,
-    type: "TASK",
-    description: `Completed task`,
-    points: 10,
-  });
+      user: submission.studentId,
+      type: "TASK",
+      description: `Completed task`,
+      points: 10,
+    });
+  }
     // Log contribution for student
 //     if (!task) {
 //   return res.status(404).json({ message: "Task not found" });

@@ -58,7 +58,7 @@ export default function AdminTasksPage() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-slate-200">
+      <div className="min-h-screen flex items-center justify-center bg-black text-zinc-200">
         Loading tasks...
       </div>
     );
@@ -72,9 +72,9 @@ export default function AdminTasksPage() {
     );
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-black via-slate-950 to-slate-900 text-slate-100">
+    <div className="min-h-screen bg-linear-to-br from-black via-zinc-950 to-zinc-900 text-zinc-100">
       {/* Header */}
-      <header className="border-b border-slate-800/80 bg-black/80 backdrop-blur sticky top-0 z-20">
+      <header className="border-b border-zinc-800/80 bg-black/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold tracking-tight">
@@ -90,7 +90,7 @@ export default function AdminTasksPage() {
       {/* Content */}
       <main className="max-w-6xl mx-auto px-4 py-10 space-y-10">
         {/* Stats */}
-        <section className="bg-slate-950/80 border border-slate-800 shadow-2xl shadow-black/60 rounded-2xl p-6 flex justify-between items-center">
+        <section className="bg-zinc-950/80 border border-zinc-800 shadow-2xl shadow-black/60 rounded-2xl p-6 flex justify-between items-center">
           <div>
             <p className="text-sm text-slate-400 mb-1">
               Total Pending Reviews
@@ -120,7 +120,7 @@ export default function AdminTasksPage() {
           {tasks.map((t) => (
             <div
               key={t._id}
-              className="bg-slate-950/60 border border-slate-800 shadow-lg rounded-xl p-5 hover:border-slate-700 transition"
+              className="bg-zinc-950/60 border border-zinc-800 shadow-lg rounded-xl p-5 hover:border-zinc-700 transition"
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
