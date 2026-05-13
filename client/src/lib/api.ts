@@ -5,6 +5,8 @@ export const api = axios.create({
   withCredentials: true, // send cookies
 });
 
+const debugApi = process.env.NEXT_PUBLIC_DEBUG_API === "true";
+
 // attach JWT from localStorage if present
 api.interceptors.request.use((config) => {
   if (config.headers) {
@@ -19,13 +21,32 @@ api.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
     if (!hasCookie && token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log("📤 Sending request with Authorization header to:", config.url);
+      if (debugApi) {
+        console.log("[api] Sending Authorization header to:", config.url);
+      }
     } else if (hasCookie) {
-      console.log("🍪 Auth cookie present, not setting Authorization header for:", config.url);
+      if (debugApi) {
+        console.log("[api] Auth cookie present for:", config.url);
+      }
     } else {
-      console.log("⚠️ No token/cookie for request to:", config.url);
+      if (debugApi) {
+        console.log("[api] No token/cookie for:", config.url);
+      }
     }
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (debugApi) {
+      const status = error?.response?.status;
+      const url = error?.config?.url;
+      const data = error?.response?.data;
+      console.log("[api] Error:", { url, status, data });
+    }
+    return Promise.reject(error);
+  }
+);
 
