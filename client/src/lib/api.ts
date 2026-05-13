@@ -7,6 +7,10 @@ export const api = axios.create({
 
 const debugApi = process.env.NEXT_PUBLIC_DEBUG_API === "true";
 
+if (debugApi && typeof window !== "undefined") {
+  console.log("[api] Base URL:", api.defaults.baseURL);
+}
+
 // attach JWT from localStorage if present
 api.interceptors.request.use((config) => {
   if (config.headers) {
