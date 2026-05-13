@@ -4,7 +4,6 @@ import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import path from "path";
-import chatRoutes from "./routes/chatRoutes";
 // Route imports
 import authRoutes from "./routes/authRoutes";
 import studentRoutes from "./routes/studentRoutes";
@@ -14,7 +13,6 @@ import submissionRoutes from "./routes/submissionRoutes";
 import referralRoutes from "./routes/referralRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import studentTaskRoutes from "./routes/studentTaskRoutes";
-import teamRoutes from "./routes/teamRoutes";
 import adminReferralRoutes from "./controllers/adminReferralApproval";
 import adminTaskRoutes from "./controllers/adminTaskApprove";
 import contributionRoutes from "./routes/contribution.routes";
@@ -84,8 +82,6 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/referrals", referralRoutes);
 app.use("/api/comments", commentRoutes);
-app.use("/api/chat", chatRoutes);
-app.use("/api/teams", teamRoutes);
 app.use("/api/admin/tasks", adminTaskRoutes);
 app.use("/api/admin/referrals", adminReferralRoutes);
 // 404 Handler

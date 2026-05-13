@@ -18,16 +18,10 @@ export default function ContributionDashboard() {
   } = useContributions();
 
   useEffect(() => {
-    const refresh = () => {
-      loadScore();
-      loadHeatmap();
-      loadHistory();
-      loadBadges();
-    };
-
-    window.addEventListener("contribution-refresh", refresh);
-    return () =>
-      window.removeEventListener("contribution-refresh", refresh);
+    loadScore();
+    loadHeatmap();
+    loadHistory();
+    loadBadges();
   }, [loadScore, loadHeatmap, loadHistory, loadBadges]);
 
   return (

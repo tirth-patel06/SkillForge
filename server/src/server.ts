@@ -1,11 +1,8 @@
 // server/src/server.ts
 import dotenv from "dotenv";
 dotenv.config();
-import { Team } from "./models/Team";
-import http from "http";
 import mongoose from "mongoose";
 import app from "./app";
-import { initSocket } from "./socket";
 //import { seedDemo } from "./utils/seed";
 
 const PORT = process.env.PORT || 8000;
@@ -21,11 +18,10 @@ async function startServer() {
 
     console.log("✅ MongoDB connected successfully");
 
-    // 2️⃣ Create HTTP server
-    const server = http.createServer(app);
-
-    // 3️⃣ Initialize socket.io
-    initSocket(server);
+    // 2️⃣ Start server
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running at http://localhost:${PORT}`);
+    });
 
     // 4️⃣ Seed Demo Data
    // try {
@@ -35,10 +31,7 @@ async function startServer() {
 //console.error("⚠️ Seed error:", seedErr);
    // }
 
-    // 5️⃣ Start server
-    server.listen(PORT, () => {
-      console.log(`🚀 Server running at http://localhost:${PORT}`);
-    });
+    // 5️⃣ Start server handled above
   } catch (err) {
     console.error("❌ Error starting server:", err);
     process.exit(1);
@@ -56,12 +49,6 @@ process.on("uncaughtException", (err) => {
   console.error("🔴 Uncaught Exception:", err);
   process.exit(1);
 });
-setInterval(async () => {
-  await Team.updateMany({}, {
-    inviteCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
-  });
-}, 5 * 60 * 1000);
-
 // ----------------------------
 // START THE SERVER
 // ----------------------------

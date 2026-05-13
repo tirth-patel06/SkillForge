@@ -67,7 +67,6 @@ router.get("/active", async (req: AuthRequest, res) => {
       description: t.description,
       difficulty: t.difficulty,      // "EASY" | "MEDIUM" | "HARD"
       techStack: t.techStack || [],
-      expectedTeamSize: t.expectedTeamSize,
       deadline: t.deadline ? t.deadline.toISOString() : null,
       status: t.status,              // still TaskStatus
       createdAt: t.createdAt?.toISOString() || new Date().toISOString(),
@@ -159,7 +158,6 @@ router.get("/enrolled", async (req: AuthRequest, res) => {
           description: t.description,
           difficulty: t.difficulty,
           techStack: t.techStack || [],
-          expectedTeamSize: t.expectedTeamSize,
           deadline: t.deadline ? t.deadline.toISOString() : null,
           taskStatus: t.status,           // TaskStatus
           submissionStatus: s.status,     // "PENDING" | "APPROVED" | "CHANGES_REQUESTED"

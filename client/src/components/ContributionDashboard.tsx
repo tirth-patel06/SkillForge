@@ -36,7 +36,6 @@
 //   const contributionScore = 72;
 //   const weeklyContributions = 5;
 //   const streakDays = 9;
-//   const skills = ["React", "TypeScript", "MongoDB", "Socket.IO"];
 
 //   return (
 //     <section className="space-y-4">

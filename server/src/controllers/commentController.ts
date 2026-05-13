@@ -2,7 +2,6 @@ import { Response } from "express";
 import TaskComment from "../models/TaskComment";
 import { Task } from "../models/Task";
 import { AuthRequest } from "../types/auth";
-import { getIO } from "../socket";
 import Contribution from "../models/Contribution";
 // Get all comments for a task
 export const getTaskComments = async (req: AuthRequest, res: Response) => {
@@ -82,11 +81,6 @@ export const createComment = async (req: AuthRequest, res: Response) => {
       description: "Commented on a task",
       points: 2,
     });
-
-    // realtime notify author
-    getIO()
-      .to(comment.authorId.toString())
-      .emit("contribution:update");
 
     const populatedComment = await TaskComment.findById(comment._id)
       .populate("authorId", "name email profilePhotoUrl")

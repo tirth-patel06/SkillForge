@@ -105,7 +105,6 @@ function StudentDashboardInner() {
   const navItems = [
     { label: "Dashboard", href: "/student/dashboard", icon: "📊" },
     { label: "My Tasks", href: "/student/tasks", icon: "✅" },
-    { label: "Teams", href: "/student/teams", icon: "👥" },
     { label: "Profile", href: "/student/profile", icon: "👤" },
     { label: "Referrals", href: "/student/referrals", icon: "✉️" },
     { label: "Contributions", href: "/student/contribution", icon: "🌱" }
@@ -249,7 +248,7 @@ function StudentDashboardInner() {
             />
           </section>
 
-          {/* QUICK NAVIGATION (Profile / Tasks / Teams) */}
+          {/* QUICK NAVIGATION (Profile / Tasks) */}
           <section className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-slate-200">
@@ -274,13 +273,6 @@ function StudentDashboardInner() {
                 href="/student/tasks"
                 accent="from-sky-500/20 to-sky-500/5"
                 pill="Tasks"
-              />
-              <DashboardCard
-                title="My Teams"
-                description="Collaborate with peers on shared tasks."
-                href="/student/teams"
-                accent="from-purple-500/20 to-purple-500/5"
-                pill="Teams"
               />
             </div>
           </section>
@@ -378,11 +370,6 @@ function StudentDashboardInner() {
                 title="Update profile"
                 description="Refresh your skills, links, and education."
                 href="/student/profile"
-              />
-              <QuickActionRow
-                title="View my teams"
-                description="Check teams you&apos;re part of and their tasks."
-                href="/student/teams"
               />
             </div>
           </section>
