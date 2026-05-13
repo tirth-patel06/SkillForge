@@ -112,16 +112,16 @@ router.post("/:taskId/enroll", async (req: AuthRequest, res) => {
         .json({ message: "You already have a submission/enrollment for this task" });
     }
 
-    // Create submission acting as "enrollment"
+    // Create a placeholder so the student can submit later
     const submission = await Submission.create({
       taskId: task._id,
       studentId: user.id,
       status: "PENDING",       // waiting for mentor review (once content is added)
-      githubUrl: undefined,    // will be filled later
+      githubUrl: "",           // will be filled later
       fileUrls: [],
       files: [],
-      notes: undefined,        // will store description later
-      submittedAt: undefined,  // will be set only when student actually submits
+      notes: "",               // will store description later
+      submittedAt: null,       // set only when student actually submits
     });
 
     return res.status(201).json({

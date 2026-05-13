@@ -35,6 +35,7 @@ export const getMentorDashboard = async (req: AuthRequest, res: Response) => {
     const pendingCount = await Submission.countDocuments({
       taskId: { $in: taskIds },
       status: "PENDING", // ✅ uppercase status
+      submittedAt: { $ne: null },
     });
 
     //recent pending submissions (populate student + task)
@@ -44,6 +45,7 @@ export const getMentorDashboard = async (req: AuthRequest, res: Response) => {
     })[] = await Submission.find({
       taskId: { $in: taskIds },
       status: "PENDING",
+      submittedAt: { $ne: null },
     })
       .sort({ submittedAt: -1 })
       .limit(5)
