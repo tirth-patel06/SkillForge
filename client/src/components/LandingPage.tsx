@@ -10,7 +10,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
       <nav className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-zinc-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-xl font-bold">The Obsidian Circle</span>
+            <span className="text-xl font-bold">SkillForge</span>
           </div>
           <button
             onClick={onGetStarted}
@@ -25,19 +25,19 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
         <section className="max-w-7xl mx-auto px-6 py-20 text-center">
           <div className="mb-8">
             <span className="inline-block px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-full text-sm text-zinc-300 mb-6">
-              Bridging Alumni and Students
+              Open Source, On Campus
             </span>
           </div>
 
           <h1 className="text-6xl md:text-7xl font-bold mb-6 leading-tight">
-            Real-World Tasks Meet
+            Bring Open Source to
             <span className="block bg-gradient-to-r from-zinc-300 via-zinc-400 to-zinc-300 bg-clip-text text-transparent">
-              Measurable Excellence
+              Every College Classroom
             </span>
           </h1>
 
           <p className="text-xl text-zinc-400 max-w-3xl mx-auto mb-12 leading-relaxed">
-            Hawkins Institute faced a critical gap: students had no structured way to connect with alumni, contributions went untracked, and mentors struggled to identify genuine performers. The Obsidian Circle transforms mentorship from informal guidance into a transparent, achievement-driven platform.
+            SkillForge simulates a real open source environment inside the college campus. Beginners learn by contributing to real tasks with mentors, transparent reviews, and clear credit, while the community grows through shared work and visible impact.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -45,7 +45,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               onClick={onGetStarted}
               className="px-8 py-4 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors font-semibold flex items-center justify-center space-x-2 text-lg"
             >
-              <span>Launch Dashboard</span>
+              <span>Start Your First Contribution</span>
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
@@ -126,7 +126,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-2xl p-12">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               <div>
-                <h3 className="text-3xl font-bold mb-8">Why The Obsidian Circle?</h3>
+                <h3 className="text-3xl font-bold mb-8">Why SkillForge?</h3>
                 <div className="space-y-6">
                   <ProblemSolution
                     problem="Informal mentorship loses guidance"
@@ -204,11 +204,6 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               accentColor="from-zinc-700 to-zinc-800"
             />
             <CapabilityBox
-              title="Team Collaboration"
-              description="Manage members, assign roles, coordinate work"
-              accentColor="from-zinc-700 to-zinc-800"
-            />
-            <CapabilityBox
               title="Version Control"
               description="Submit iteratively, preserve all versions for review"
               accentColor="from-zinc-700 to-zinc-800"
@@ -230,7 +225,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           <div className="bg-gradient-to-r from-zinc-800 to-zinc-900 rounded-2xl p-12 md:p-16 text-center border border-zinc-700">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to Transform Mentorship?</h2>
             <p className="text-lg text-zinc-300 mb-8 max-w-2xl mx-auto">
-              Join The Obsidian Circle and experience the future of alumni-student collaboration. Track real work. Earn real recognition. Build real careers.
+              Join SkillForge and experience the future of alumni-student collaboration. Track real work. Earn real recognition. Build real careers.
             </p>
             <button
               onClick={onGetStarted}
@@ -279,7 +274,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             </div>
 
             <div className="border-t border-zinc-800 pt-8 flex flex-col md:flex-row justify-between items-center text-zinc-400">
-              <p>&copy; 2025 The Obsidian Circle. All rights reserved.</p>
+              <p>&copy; 2026 SkillForge. All rights reserved.</p>
               <div className="flex space-x-6 mt-4 md:mt-0">
                 <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
                 <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
