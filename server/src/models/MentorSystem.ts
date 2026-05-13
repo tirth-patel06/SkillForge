@@ -61,7 +61,7 @@ export interface ISubmission extends Document {
   files: string[];
   notes?: string;
   status: SubmissionStatus;
-  submittedAt: Date;
+  submittedAt: Date | null;
   reviewedBy?: Types.ObjectId; // ref: "User" (mentor)
   reviewedAt?: Date;
   review?: IReview;
@@ -87,7 +87,7 @@ const SubmissionSchema = new Schema<ISubmission>({
     enum: ["PENDING", "APPROVED", "CHANGES_REQUESTED"],
     default: "PENDING",
   },
-  submittedAt: { type: Date, default: Date.now },
+  submittedAt: { type: Date, default: null },
   reviewedBy: {
     type: Schema.Types.ObjectId,
     ref: "User",
