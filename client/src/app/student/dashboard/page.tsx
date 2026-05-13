@@ -8,6 +8,12 @@ import { usePathname } from "next/navigation";
 import { meApi, logoutApi, type User } from "@/api/auth";
 import { fetchEnrolledTasks, EnrolledTaskItem } from "@/api/studentTasks";
 import ContributionDashboard from "@/components/contribution/ContributionDashboard";
+import { api } from "@/lib/api";
+
+type ReferralSummary = {
+  id: string;
+  status: string;
+};
 function StudentDashboardInner() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,6 +28,8 @@ function StudentDashboardInner() {
     needingAttention: 0,
   });
   const [tasksLoading, setTasksLoading] = useState(true);
+  const [referralsLoading, setReferralsLoading] = useState(true);
+  const [referralsCount, setReferralsCount] = useState(0);
 
   useEffect(() => {
     meApi()
@@ -32,15 +40,20 @@ function StudentDashboardInner() {
       .finally(() => setLoading(false));
   }, []);
 
-  // 🔹 Load enrolled tasks once to compute summary
+  // 🔹 Load enrolled tasks + referrals once to compute summary
   useEffect(() => {
     const loadTaskSummary = async () => {
       try {
         setTasksLoading(true);
-        const items: EnrolledTaskItem[] = await fetchEnrolledTasks();
+        setReferralsLoading(true);
+        const [items, referralsRes] = await Promise.all([
+          fetchEnrolledTasks(),
+          api.get<ReferralSummary[]>("/referrals/my"),
+        ]);
+        const referrals = referralsRes.data || [];
 
         const pendingReviews = items.filter(
-          (i) => i.submissionStatus === "PENDING"
+          (i) => i.submissionStatus === "PENDING" && i.submittedAt
         ).length;
 
         const approvedTasks = items.filter(
@@ -73,10 +86,13 @@ function StudentDashboardInner() {
           otherTasks: otherTasks < 0 ? 0 : otherTasks,
           needingAttention,
         });
+
+        setReferralsCount(referrals.length);
       } catch (err) {
         console.error("Failed to load student task summary", err);
       } finally {
         setTasksLoading(false);
+        setReferralsLoading(false);
       }
     };
 
@@ -241,8 +257,12 @@ function StudentDashboardInner() {
             />
             <MetricCard
               title="Referrals"
-              value="0"
-              subtitle="pending referral slots"
+              value={
+                referralsLoading
+                  ? "—"
+                  : String(referralsCount)
+              }
+              subtitle="total referrals"
               accent="from-[#4ade80] to-[#22c55e]"
               icon="📨"
             />
