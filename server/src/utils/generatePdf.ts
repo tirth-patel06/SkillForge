@@ -73,15 +73,13 @@ export async function createReferralPdf(referralData: {
       try {
         const result = await cloudinary.uploader.upload(filePath, {
           folder: "referrals",
-          resource_type: "raw", // important for PDF
+          resource_type: "image", // important for PDF
           public_id: `referral_${Date.now()}`,
         });
 
         cloudUrl = cloudinary.url(result.public_id, {
-          resource_type: "raw",
-          format: "pdf",
+          resource_type: "image",
           secure: true,
-          flags: "attachment",
         });
       } catch (err) {
         console.error("Cloudinary upload failed:", err);
