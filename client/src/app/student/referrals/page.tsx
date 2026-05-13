@@ -18,16 +18,16 @@ type ReferralItem = {
 function statusBadgeClass(status: ReferralItem["status"]) {
   switch (status) {
     case "APPROVED":
-      return "bg-emerald-500/10 text-emerald-300 border-emerald-500/40";
+      return "bg-zinc-700/30 text-zinc-200 border-zinc-600";
     case "PENDING":
-      return "bg-amber-500/10 text-amber-300 border-amber-500/40";
+      return "bg-zinc-700/30 text-zinc-200 border-zinc-600";
     case "REJECTED":
     case "REMOVED":
-      return "bg-rose-500/10 text-rose-300 border-rose-500/40";
+      return "bg-zinc-700/30 text-zinc-200 border-zinc-600";
     case "ACCEPTED":
-      return "bg-sky-500/10 text-sky-300 border-sky-500/40";
+      return "bg-zinc-700/30 text-zinc-200 border-zinc-600";
     default:
-      return "bg-slate-500/10 text-slate-300 border-slate-500/40";
+      return "bg-zinc-700/30 text-zinc-200 border-zinc-600";
   }
 }
 
@@ -52,8 +52,8 @@ function StudentReferralsInner() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#02040b] text-slate-100">
-      <header className="border-b border-slate-900 px-6 py-4 bg-black/70">
+    <div className="min-h-screen bg-black text-zinc-100">
+      <header className="border-b border-zinc-800 px-6 py-4 bg-black/70">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-2xl font-semibold tracking-tight">Referrals</h1>
           <p className="text-sm text-slate-400">
@@ -66,7 +66,7 @@ function StudentReferralsInner() {
         {loading ? (
           <div className="text-sm text-slate-400">Loading referrals...</div>
         ) : items.length === 0 ? (
-          <div className="rounded-xl border border-slate-900 bg-[#050814] p-6 text-sm text-slate-400">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-6 text-sm text-zinc-400">
             No referrals yet.
           </div>
         ) : (
@@ -74,7 +74,7 @@ function StudentReferralsInner() {
             {items.map((ref) => (
               <div
                 key={ref.id}
-                className="rounded-2xl border border-slate-900 bg-[#050814] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.8)]"
+                className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.8)]"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-2">
@@ -106,7 +106,7 @@ function StudentReferralsInner() {
                         href={ref.pdf_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-emerald-200 hover:bg-emerald-500/20"
+                        className="inline-flex items-center gap-2 rounded-lg border border-zinc-600 bg-zinc-800 px-3 py-2 text-zinc-200 hover:bg-zinc-700"
                       >
                         Download PDF
                       </a>

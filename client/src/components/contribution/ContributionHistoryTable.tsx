@@ -29,10 +29,10 @@ export default function ContributionHistoryTable() {
             <tr key={c._id} className="border-t border-slate-800">
               <td>{c.type}</td>
               <td>{c.description}</td>
-              <td align="right" className="text-emerald-400">
+              <td align="right" className="text-zinc-200">
                 +{c.points}
               </td>
-              <td align="right" className="text-slate-500">
+              <td align="right" className="text-zinc-400">
                 {new Date(c.createdAt).toLocaleDateString()}
               </td>
             </tr>

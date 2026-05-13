@@ -32,16 +32,16 @@ function AdminDashboardInner() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-black via-slate-950 to-slate-900 text-slate-200">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-black via-zinc-950 to-zinc-900 text-zinc-200">
         <p className="text-sm">Loading admin console…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-black via-slate-950 to-slate-900 text-slate-100">
+    <div className="min-h-screen bg-linear-to-br from-black via-zinc-950 to-zinc-900 text-zinc-100">
       {/* Top Bar */}
-      <header className="border-b border-slate-800/80 bg-black/80 backdrop-blur sticky top-0 z-20">
+      <header className="border-b border-zinc-800/80 bg-black/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold tracking-tight">
@@ -74,7 +74,7 @@ function AdminDashboardInner() {
       {/* Content */}
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
         {/* Hero card */}
-        <section className="bg-slate-950/80 border border-slate-800 rounded-2xl p-6 shadow-2xl shadow-black/60 flex flex-col md:flex-row justify-between gap-4">
+        <section className="bg-zinc-950/80 border border-zinc-800 rounded-2xl p-6 shadow-2xl shadow-black/60 flex flex-col md:flex-row justify-between gap-4">
           <div>
             <p className="text-sm text-slate-400 mb-1">Welcome,</p>
             <h2 className="text-2xl md:text-3xl font-semibold">
@@ -135,7 +135,7 @@ function DashboardCard({
   return (
     <Link
       href={href}
-      className={`group relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/80 p-5 shadow-lg shadow-black/50 hover:shadow-xl hover:shadow-black/80 transition transform hover:-translate-y-1`}
+      className={`group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/80 p-5 shadow-lg shadow-black/50 hover:shadow-xl hover:shadow-black/80 transition transform hover:-translate-y-1`}
     >
       <div
         className={`pointer-events-none absolute inset-0 bg-linear-to-br ${accent} opacity-0 group-hover:opacity-100 transition`}
