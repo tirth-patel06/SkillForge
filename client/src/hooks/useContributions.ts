@@ -40,7 +40,7 @@
 //   };
 // };
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { getBadges, getHistory, getScore } from "@/api/contributions";
 
 export const useContributions = () => {
@@ -51,32 +51,28 @@ export const useContributions = () => {
   const [history, setHistory] = useState<any[]>([]);
   const [badges, setBadges] = useState<any[]>([]);
 
-  const loadScore = async () => {
+  const loadScore = useCallback(async () => {
     const res = await getScore();
-
-    console.log("⭐ SCORE FROM BACKEND:", res.data);
 
     setScore(res.data.score);
     setWeeklyCount(res.data.weeklyCount);
     setStreak(res.data.streak);
-  };
+  }, []);
 
-  const loadHeatmap = async () => {
+  const loadHeatmap = useCallback(async () => {
     // Heatmap component likely fetches its own data
     // Leaving intentionally empty is OK
-  };
+  }, []);
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     const res = await getHistory();
-    console.log("📜 HISTORY FROM BACKEND:", res);
     setHistory(res);
-  };
+  }, []);
 
-  const loadBadges = async () => {
+  const loadBadges = useCallback(async () => {
     const res = await getBadges();
-    console.log("🏆 BADGES FROM BACKEND:", res);
     setBadges(res);
-  };
+  }, []);
 
   // ✅ NOW MATCHES DASHBOARD EXPECTATIONS
   return {
