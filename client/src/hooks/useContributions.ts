@@ -41,7 +41,7 @@
 // };
 
 import { useCallback, useState } from "react";
-import { getBadges, getHistory, getScore } from "@/api/contributions";
+import { getBadges, getHistory, getScore, getStats } from "@/api/contributions";
 
 export const useContributions = () => {
   const [score, setScore] = useState<number>(0);
@@ -52,11 +52,11 @@ export const useContributions = () => {
   const [badges, setBadges] = useState<any[]>([]);
 
   const loadScore = useCallback(async () => {
-    const res = await getScore();
+    const [scoreRes, statsRes] = await Promise.all([getScore(), getStats()]);
 
-    setScore(res.data.score);
-    setWeeklyCount(res.data.weeklyCount);
-    setStreak(res.data.streak);
+    setScore(scoreRes.data.score ?? 0);
+    setWeeklyCount(statsRes.data.weeklyCount ?? 0);
+    setStreak(statsRes.data.streak ?? 0);
   }, []);
 
   const loadHeatmap = useCallback(async () => {
@@ -66,12 +66,12 @@ export const useContributions = () => {
 
   const loadHistory = useCallback(async () => {
     const res = await getHistory();
-    setHistory(res);
+    setHistory(res || []);
   }, []);
 
   const loadBadges = useCallback(async () => {
     const res = await getBadges();
-    setBadges(res);
+    setBadges(res || []);
   }, []);
 
   // ✅ NOW MATCHES DASHBOARD EXPECTATIONS
