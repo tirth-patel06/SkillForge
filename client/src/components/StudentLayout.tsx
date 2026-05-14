@@ -44,8 +44,8 @@ export function StudentLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-black text-white">
-      <aside className="w-64 bg-zinc-950 border-r border-zinc-800 flex flex-col">
+    <div className="flex min-h-screen items-start bg-black text-white">
+      <aside className="w-64 shrink-0 self-start sticky top-0 h-screen overflow-y-auto bg-zinc-950 border-r border-zinc-800 flex flex-col">
         <div className="p-6 border-b border-zinc-800">
           <h1 className="text-xl font-bold">SkillForge</h1>
           <p className="text-sm text-zinc-400 mt-1">Student Workspace</p>
@@ -103,7 +103,7 @@ export function StudentLayout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-auto bg-black">{children}</main>
+      <main className="flex-1 min-h-screen overflow-auto bg-black">{children}</main>
     </div>
   );
 }

@@ -353,7 +353,7 @@ function ExploreView({
                           {task.title}
                         </h3>
                         {isEnrolled && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-700/30 text-zinc-200 border border-zinc-600">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                             Enrolled
                           </span>
                         )}
@@ -511,12 +511,12 @@ function ExploreView({
 function statusBadgeClass(status: SubmissionStatus) {
   switch (status) {
     case "APPROVED":
-      return "bg-zinc-700/30 text-zinc-200 border-zinc-600";
+      return "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
     case "CHANGES_REQUESTED":
-      return "bg-zinc-700/30 text-zinc-200 border-zinc-600";
+      return "bg-amber-500/15 text-amber-300 border-amber-500/30";
     case "PENDING":
     default:
-      return "bg-zinc-700/30 text-zinc-200 border-zinc-600";
+      return "bg-sky-500/15 text-sky-300 border-sky-500/30";
   }
 }
 

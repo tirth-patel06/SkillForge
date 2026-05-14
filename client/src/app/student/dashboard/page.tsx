@@ -7,6 +7,7 @@ import Link from "next/link";
 import { meApi } from "@/api/auth";
 import { fetchEnrolledTasks, EnrolledTaskItem } from "@/api/studentTasks";
 import ContributionDashboard from "@/components/contribution/ContributionDashboard";
+import { getScore } from "@/api/contributions";
 import { api } from "@/lib/api";
 
 type ReferralSummary = {
@@ -21,11 +22,12 @@ function StudentDashboardInner() {
     activeTasks: 0,
     approvedTasks: 0,
     otherTasks: 0,
-    needingAttention: 0,
   });
   const [tasksLoading, setTasksLoading] = useState(true);
   const [referralsLoading, setReferralsLoading] = useState(true);
   const [referralsCount, setReferralsCount] = useState(0);
+  const [scoreLoading, setScoreLoading] = useState(true);
+  const [totalScore, setTotalScore] = useState(0);
 
   useEffect(() => {
     meApi()
@@ -59,18 +61,6 @@ function StudentDashboardInner() {
           (i) => i.taskStatus === "ACTIVE" && i.submissionStatus !== "APPROVED"
         ).length;
 
-        // Needing attention: changes requested OR deadline soon (within 3 days)
-        const now = new Date().getTime();
-        const threeDays = 3 * 24 * 60 * 60 * 1000;
-        const needingAttention = items.filter((i) => {
-          const hasChanges = i.submissionStatus === "CHANGES_REQUESTED";
-          const hasNearDeadline =
-            i.deadline &&
-            new Date(i.deadline).getTime() - now <= threeDays &&
-            i.submissionStatus !== "APPROVED";
-          return hasChanges || hasNearDeadline;
-        }).length;
-
         const otherTasks =
           items.length - (activeTasks + approvedTasks + pendingReviews);
 
@@ -79,7 +69,6 @@ function StudentDashboardInner() {
           activeTasks,
           approvedTasks,
           otherTasks: otherTasks < 0 ? 0 : otherTasks,
-          needingAttention,
         });
 
         setReferralsCount(referrals.length);
@@ -92,6 +81,22 @@ function StudentDashboardInner() {
     };
 
     loadTaskSummary();
+  }, []);
+
+  useEffect(() => {
+    const loadTotalScore = async () => {
+      try {
+        setScoreLoading(true);
+        const { data } = await getScore();
+        setTotalScore(data.score ?? 0);
+      } catch (err) {
+        console.error("Failed to load student score", err);
+      } finally {
+        setScoreLoading(false);
+      }
+    };
+
+    loadTotalScore();
   }, []);
 
   if (loading) {
@@ -140,15 +145,11 @@ function StudentDashboardInner() {
               icon="✅"
             />
             <MetricCard
-              title="Tasks Needing Attention"
-              value={
-                tasksLoading
-                  ? "—"
-                  : String(taskSummary.needingAttention)
-              }
-              subtitle="near deadlines or changes"
+              title="Total Score"
+              value={scoreLoading ? "—" : String(totalScore)}
+              subtitle="all contribution points so far"
               accent="from-yellow-500 to-orange-500"
-              icon="⚠️"
+              icon="⭐"
             />
             <MetricCard
               title="Referrals"

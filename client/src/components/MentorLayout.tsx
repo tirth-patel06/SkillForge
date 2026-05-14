@@ -72,8 +72,8 @@ export function MentorLayout({ children, currentPage, onNavigate, user, onLogout
     <div className="flex h-screen bg-black text-white">
       <aside className="w-64 bg-zinc-950 border-r border-zinc-800 flex flex-col">
         <div className="p-6 border-b border-zinc-800">
-          <h1 className="text-xl font-bold">Mentor Hub</h1>
-          <p className="text-sm text-zinc-400 mt-1">Task & Review System</p>
+          <h1 className="text-xl font-bold">SkillForge</h1>
+          <p className="text-sm text-zinc-400 mt-1">Mentor Workspace</p>
         </div>
 
         <nav className="flex-1 p-4">
