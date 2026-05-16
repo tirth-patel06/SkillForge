@@ -15,6 +15,8 @@ export async function sendOtpEmail(to: string, otp: string) {
   const port = Number(process.env.SMTP_PORT) || 587;
   const secure = port === 465; // true for 465, false for others
 
+  console.log(`[SMTP Debug] Attempting connection to ${process.env.SMTP_HOST}:${port} (Secure: ${secure})`);
+
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port,
