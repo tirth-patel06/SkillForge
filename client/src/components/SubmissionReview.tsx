@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import type React from "react";
 import { api } from "@/lib/api";
+import { getStudentProfile } from "@/api/studentProfile";
+import { StudentProfileModal } from "./StudentProfileModal";
+import type { PublicStudentProfile } from "@/api/studentProfile";
 import {
   ChevronRight,
   ExternalLink,
@@ -54,6 +57,9 @@ export function SubmissionReview() {
   const [message, setMessage] = useState("");
   const [activeTab, setActiveTab] = useState<"pending" | "reviewed">("pending");
   const [submissionScores, setSubmissionScores] = useState<Score[]>([]);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [studentProfile, setStudentProfile] = useState<PublicStudentProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
 
   useEffect(() => {
     loadSubmissions();
@@ -177,6 +183,21 @@ export function SubmissionReview() {
       setMessage(`Error: ${error.response?.data?.message || error.message}`);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleOpenProfileModal = async () => {
+    if (!selectedSubmission?.student_id) return;
+
+    setLoadingProfile(true);
+    try {
+      const profile = await getStudentProfile(selectedSubmission.student_id);
+      setStudentProfile(profile);
+      setShowProfileModal(true);
+    } catch (error) {
+      console.error("Error loading student profile:", error);
+    } finally {
+      setLoadingProfile(false);
     }
   };
 
@@ -313,10 +334,16 @@ export function SubmissionReview() {
               </div>
 
               <div className="flex items-center space-x-6 text-sm text-zinc-400">
-                <div className="flex items-center">
+                <button
+                  onClick={handleOpenProfileModal}
+                  disabled={loadingProfile}
+                  className="flex items-center group cursor-pointer hover:text-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   <User className="w-4 h-4 mr-2" />
-                  <span className="font-medium">{selectedSubmission.student_name}</span>
-                </div>
+                  <span className="font-medium underline underline-offset-2 group-hover:text-blue-300">
+                    {selectedSubmission.student_name}
+                  </span>
+                </button>
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
                   {new Date(selectedSubmission.submitted_at).toLocaleString()}
@@ -491,6 +518,15 @@ export function SubmissionReview() {
           </div>
         )}
       </main>
+
+      <StudentProfileModal
+        student={studentProfile}
+        isOpen={showProfileModal}
+        onClose={() => {
+          setShowProfileModal(false);
+          setStudentProfile(null);
+        }}
+      />
     </div>
   );
 }

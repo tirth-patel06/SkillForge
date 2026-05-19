@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type React from "react";
 import { api } from "@/lib/api";
-import { Plus, X, Send, FileText, Link as LinkIcon, User } from "lucide-react";
+import { Plus, X, Send, FileText, Link as LinkIcon, User, Download } from "lucide-react";
 
 type Student = {
   id: string;
@@ -22,6 +22,7 @@ type SavedReferral = {
   evidence_links: string[];
   status: string;
   created_at: string;
+  pdf_url?: string;
 };
 
 export function ReferralSystem() {
@@ -301,13 +302,26 @@ export function ReferralSystem() {
                         {new Date(referral.created_at).toLocaleTimeString()}
                       </p>
                     </div>
-                    <span
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                        referral.status
-                      )}`}
-                    >
-                      {referral.status}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {referral.pdf_url && (
+                        <a
+                          href={referral.pdf_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-2 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 transition-colors"
+                          title="Download referral PDF"
+                        >
+                          <Download className="w-4 h-4" />
+                        </a>
+                      )}
+                      <span
+                        className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                          referral.status
+                        )}`}
+                      >
+                        {referral.status}
+                      </span>
+                    </div>
                   </div>
 
                   <p className="text-sm text-zinc-400 line-clamp-3 mb-3">
