@@ -1,5 +1,5 @@
 // server/src/lib/sendEmail.ts
-import * as SibApiV3Sdk from "sib-api-v3-sdk";
+import { BrevoClient } from "@getbrevo/brevo";
 
 
 function escapeHtml(value: string) {
@@ -12,7 +12,7 @@ function escapeHtml(value: string) {
 }
 
 function buildOtpEmailHtml(otp: string, name?: string, role?: string) {
-  const appName = process.env.APP_NAME || "Mentor Hub";
+  const appName = process.env.APP_NAME || "SkillForge";
   const safeName = escapeHtml(name || "there");
   const safeRole = escapeHtml(role ? role.toLowerCase() : "member");
   const safeAppName = escapeHtml(appName);
@@ -63,21 +63,20 @@ async function sendViaBrevo(to: string, otp: string, name?: string, role?: strin
     return { ok: false, reason: "BREVO not configured" } as const;
   }
 
-  const defaultClient = SibApiV3Sdk.ApiClient.instance;
-  const keyAuth = defaultClient.authentications["api-key"];
-  keyAuth.apiKey = apiKey;
-
   try {
-    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    const brevo = new BrevoClient({
+      apiKey,
+      timeoutInSeconds: 30,
+    });
 
-    sendSmtpEmail.subject = "Your Mentor Hub verification code";
-    sendSmtpEmail.htmlContent = buildOtpEmailHtml(otp, name, role);
-    sendSmtpEmail.sender = { name: senderName, email: senderEmail };
-    sendSmtpEmail.to = [{ email: to, name: name || undefined }];
+    const result = await brevo.transactionalEmails.sendTransacEmail({
+      subject: "Your Mentor Hub verification code",
+      htmlContent: buildOtpEmailHtml(otp, name, role),
+      sender: { name: senderName, email: senderEmail },
+      to: [{ email: to, name }],
+    });
 
-    const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log("[sendOtpEmail] Sent OTP via Brevo:", data?.messageId);
+    console.log("[sendOtpEmail] Sent OTP via Brevo:", result?.messageId);
     return { ok: true } as const;
   } catch (err) {
     console.error("[sendOtpEmail] Brevo failed:", err);
