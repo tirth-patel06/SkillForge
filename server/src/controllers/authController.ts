@@ -74,7 +74,7 @@ export const register = async (req: Request, res: Response) => {
     }
 
     // Fire-and-forget email sending; do NOT block or crash signup
-    sendOtpEmail(user.email, otp).catch((err) => {
+    sendOtpEmail(user.email, otp, user.name, user.role).catch((err) => {
       console.error("[register] Failed to send OTP email:", err);
     });
 
@@ -161,6 +161,11 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
+    if (!user.verified) {
+      res.status(403).json({ message: "Email not verified" });
+      return;
+    }
+
     const token = createJwt(user);
     setAuthCookie(res, token);
 
@@ -201,20 +206,3 @@ export const logout = (req: Request, res: Response) => {
   res.json({ message: "Logged out" });
 };
 
-// Used by GitHub callback route after passport auth
-export const githubCallbackHandler = (req: Request, res: Response) => {
-  const user = req.user as any;
-  const token = createJwt(user);
-  const frontendUrl =
-    process.env.FRONTEND_URL ||
-    process.env.CLIENT_URL ||
-    "http://localhost:3000";
-
-  setAuthCookie(res, token);
-  if (process.env.NODE_ENV === "production") {
-    res.redirect(`${frontendUrl}/github-callback`);
-    return;
-  }
-
-  res.redirect(`${frontendUrl}/github-callback?token=${token}`);
-};

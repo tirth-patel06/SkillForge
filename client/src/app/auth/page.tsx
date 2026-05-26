@@ -43,8 +43,6 @@ export default function AuthPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const githubUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/auth/github`;
-
   const handleInput =
     (field: "name" | "email" | "password") =>
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -277,31 +275,6 @@ export default function AuthPage() {
             </button>
           </form>
         )}
-
-        {/* Divider */}
-        <div className="flex items-center my-5">
-          <span className="flex-1 h-px bg-slate-200" />
-          <span className="px-3 text-xs text-slate-400">OR</span>
-          <span className="flex-1 h-px bg-slate-200" />
-        </div>
-
-        {/* GitHub button */}
-        <a href={githubUrl}>
-          <button
-            type="button"
-            className="w-full py-2.5 rounded-lg bg-slate-900 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-black transition"
-          >
-            <svg
-              className="w-5 h-5"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 008 10.95c.59.11.8-.26.8-.57v-2.02c-3.26.71-3.95-1.41-3.95-1.41-.54-1.37-1.33-1.74-1.33-1.74-1.09-.76.08-.75.08-.75 1.21.09 1.85 1.24 1.85 1.24 1.07 1.83 2.81 1.3 3.5.99.11-.78.42-1.3.76-1.6-2.6-.3-5.34-1.3-5.34-5.82 0-1.29.46-2.35 1.23-3.18-.12-.3-.54-1.52.12-3.17 0 0 1-.32 3.3 1.21A11.4 11.4 0 0112 6.8c1.02.01 2.05.14 3.01.41 2.29-1.53 3.29-1.21 3.29-1.21.67 1.65.25 2.87.13 3.17.77.83 1.23 1.89 1.23 3.18 0 4.53-2.75 5.52-5.37 5.81.43.37.81 1.1.81 2.23v3.3c0 .3.21.67.81.56A11.5 11.5 0 0023.5 12C23.5 5.65 18.35.5 12 .5z" />
-            </svg>
-            Continue with GitHub
-          </button>
-        </a>
 
         {/* Messages */}
         {message && (
