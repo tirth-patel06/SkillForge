@@ -1,8 +1,6 @@
 // server/src/lib/sendEmail.ts
-type ResendResponse = {
-  id?: string;
-  message?: string;
-};
+import { Resend } from "resend";
+
 
 function escapeHtml(value: string) {
   return value
@@ -55,6 +53,8 @@ function buildOtpEmailHtml(otp: string, name?: string, role?: string) {
   `;
 }
 
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 async function sendViaResend(to: string, otp: string, name?: string, role?: string) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM || process.env.SMTP_FROM;
@@ -63,36 +63,24 @@ async function sendViaResend(to: string, otp: string, name?: string, role?: stri
     return { ok: false, reason: "RESEND not configured" } as const;
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
-
   try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from,
-        to,
-        subject: "Your Mentor Hub verification code",
-        html: buildOtpEmailHtml(otp, name, role),
-      }),
-      signal: controller.signal,
+    const { data, error } = await resend.emails.send({
+      from,
+      to,
+      subject: "Your Mentor Hub verification code",
+      html: buildOtpEmailHtml(otp, name, role),
     });
 
-    const data = (await res.json().catch(() => ({}))) as ResendResponse;
-
-    if (!res.ok) {
-      console.error("[sendOtpEmail] Resend failed:", data);
+    if (error) {
+      console.error("[sendOtpEmail] Resend failed:", error);
       return { ok: false, reason: "RESEND failed" } as const;
     }
 
-    console.log("[sendOtpEmail] Sent OTP via Resend:", data.id);
+    console.log("[sendOtpEmail] Sent OTP via Resend:", data?.id);
     return { ok: true } as const;
-  } finally {
-    clearTimeout(timeout);
+  } catch (err) {
+    console.error("[sendOtpEmail] Resend failed:", err);
+    return { ok: false, reason: "RESEND failed" } as const;
   }
 }
 

@@ -53,39 +53,6 @@ export const register = async (req: Request, res: Response) => {
         res.status(400).json({ message: "Email already in use" });
         return;
       }
-
-      const passwordHash = await bcrypt.hash(password, 10);
-
-      // regenerate OTP for unverified users
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
-
-      existing.passwordHash = passwordHash;
-      if (name) {
-        existing.name = name;
-      }
-      if (role) {
-        existing.role = role;
-      }
-      existing.otpCode = otp;
-      existing.otpExpiresAt = otpExpiresAt;
-      await existing.save();
-
-      if (process.env.NODE_ENV !== "production") {
-        console.log(`🔐 OTP for ${existing.email}: ${otp}`);
-      }
-
-      sendOtpEmail(existing.email, otp, existing.name, existing.role).catch(
-        (err) => {
-          console.error("[register] Failed to send OTP email:", err);
-        }
-      );
-
-      res.status(200).json({
-        message: "OTP re-sent. Please verify your email.",
-        email: existing.email,
-      });
-      return;
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
