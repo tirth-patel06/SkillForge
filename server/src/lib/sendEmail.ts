@@ -1,5 +1,5 @@
 // server/src/lib/sendEmail.ts
-import { Resend } from "resend";
+import * as SibApiV3Sdk from "sib-api-v3-sdk";
 
 
 function escapeHtml(value: string) {
@@ -53,34 +53,35 @@ function buildOtpEmailHtml(otp: string, name?: string, role?: string) {
   `;
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+async function sendViaBrevo(to: string, otp: string, name?: string, role?: string) {
+  const apiKey = process.env.BREVO_API_KEY;
+  const senderEmail = process.env.BREVO_SENDER_EMAIL;
+  const senderName =
+    process.env.BREVO_SENDER_NAME || process.env.APP_NAME || "Mentor Hub";
 
-async function sendViaResend(to: string, otp: string, name?: string, role?: string) {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM || process.env.SMTP_FROM;
-
-  if (!apiKey || !from) {
-    return { ok: false, reason: "RESEND not configured" } as const;
+  if (!apiKey || !senderEmail) {
+    return { ok: false, reason: "BREVO not configured" } as const;
   }
 
+  const defaultClient = SibApiV3Sdk.ApiClient.instance;
+  const keyAuth = defaultClient.authentications["api-key"];
+  keyAuth.apiKey = apiKey;
+
   try {
-    const { data, error } = await resend.emails.send({
-      from,
-      to,
-      subject: "Your Mentor Hub verification code",
-      html: buildOtpEmailHtml(otp, name, role),
-    });
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
 
-    if (error) {
-      console.error("[sendOtpEmail] Resend failed:", error);
-      return { ok: false, reason: "RESEND failed" } as const;
-    }
+    sendSmtpEmail.subject = "Your Mentor Hub verification code";
+    sendSmtpEmail.htmlContent = buildOtpEmailHtml(otp, name, role);
+    sendSmtpEmail.sender = { name: senderName, email: senderEmail };
+    sendSmtpEmail.to = [{ email: to, name: name || undefined }];
 
-    console.log("[sendOtpEmail] Sent OTP via Resend:", data?.id);
+    const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log("[sendOtpEmail] Sent OTP via Brevo:", data?.messageId);
     return { ok: true } as const;
   } catch (err) {
-    console.error("[sendOtpEmail] Resend failed:", err);
-    return { ok: false, reason: "RESEND failed" } as const;
+    console.error("[sendOtpEmail] Brevo failed:", err);
+    return { ok: false, reason: "BREVO failed" } as const;
   }
 }
 
@@ -90,13 +91,13 @@ export async function sendOtpEmail(
   name?: string,
   role?: string
 ) {
-  const resendAttempt = await sendViaResend(to, otp, name, role);
-  if (resendAttempt.ok) {
+  const brevoAttempt = await sendViaBrevo(to, otp, name, role);
+  if (brevoAttempt.ok) {
     return;
   }
 
   console.warn(
-    "[sendOtpEmail] Resend not configured. Skipping email. OTP =",
+    "[sendOtpEmail] Brevo not configured. Skipping email. OTP =",
     otp,
     "for",
     to
