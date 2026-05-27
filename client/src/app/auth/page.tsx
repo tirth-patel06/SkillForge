@@ -120,7 +120,7 @@ export default function AuthPage() {
         {/* Header */}
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold text-slate-900">
-            Mentor Hub Portal
+            SkillForge Portal
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             Login or create an account to continue

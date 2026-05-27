@@ -17,6 +17,45 @@ function buildOtpEmailHtml(otp: string, name?: string, role?: string) {
   const safeRole = escapeHtml(role ? role.toLowerCase() : "member");
   const safeAppName = escapeHtml(appName);
   const safeOtp = escapeHtml(otp);
+  const roleKey = (role || "").toLowerCase();
+  const roleLabel = roleKey.includes("mentor")
+    ? "Mentor"
+    : roleKey.includes("admin")
+    ? "Admin"
+    : roleKey.includes("student")
+    ? "Student"
+    : "Member";
+
+  const roleActions = roleKey.includes("mentor")
+    ? [
+        "Create real-world tasks with clear rubrics and deadlines",
+        "Review submissions with structured feedback and scores",
+        "Track mentee progress and request updates",
+        "Write evidence-backed referrals for top contributors",
+      ]
+    : roleKey.includes("admin")
+    ? [
+        "Verify users and manage role permissions",
+        "Moderate tasks and resolve disputes",
+        "Monitor platform activity and analytics",
+        "Maintain quality and fairness across reviews",
+      ]
+    : roleKey.includes("student")
+    ? [
+        "Join teams and browse tasks with clear rubrics",
+        "Submit work in iterations and track your history",
+        "Collaborate in task threads and ask for guidance",
+        "Earn badges and build a verified portfolio",
+      ]
+    : [
+        "Explore tasks and follow contribution guidelines",
+        "Collaborate with mentors and peers",
+        "Track submissions and feedback",
+      ];
+
+  const actionItems = roleActions
+    .map((item) => `<li style="margin:0 0 8px;">${escapeHtml(item)}</li>`)
+    .join("");
 
   return `
   <div style="margin:0;padding:0;background:#0f172a;">
@@ -38,6 +77,11 @@ function buildOtpEmailHtml(otp: string, name?: string, role?: string) {
                   <span style="font-size:26px;letter-spacing:6px;font-weight:700;color:#ffffff;">${safeOtp}</span>
                 </div>
                 <p style="margin:12px 0 0;font-size:14px;color:#94a3b8;">This code expires in 15 minutes. If you did not request it, you can ignore this email.</p>
+                <p style="margin:16px 0 10px;font-size:15px;line-height:22px;color:#cbd5f5;">${safeAppName} brings open-source style mentorship to campus with transparent reviews, versioned submissions, and clear credit for contributions.</p>
+                <div style="margin:14px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;">Your ${roleLabel} toolkit</div>
+                <ul style="margin:8px 0 0 18px;padding:0;color:#e2e8f0;">
+                  ${actionItems}
+                </ul>
               </td>
             </tr>
             <tr>
@@ -70,7 +114,7 @@ async function sendViaBrevo(to: string, otp: string, name?: string, role?: strin
     });
 
     const result = await brevo.transactionalEmails.sendTransacEmail({
-      subject: "Your Mentor Hub verification code",
+      subject: "Your SkillForge verification code",
       htmlContent: buildOtpEmailHtml(otp, name, role),
       sender: { name: senderName, email: senderEmail },
       to: [{ email: to, name }],

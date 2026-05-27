@@ -3,8 +3,13 @@ import type { ReactNode } from "react";
 import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata = {
-  title: "Mentor Hub",
+  title: "SkillForge",
   description: "Mentor platform",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
