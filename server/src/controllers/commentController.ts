@@ -79,7 +79,7 @@ export const createComment = async (req: AuthRequest, res: Response) => {
       user: comment.authorId, // ✅ correct field
       type: "COMMENT",
       description: "Commented on a task",
-      points: 2,
+      points: 0.20,
     });
 
     const populatedComment = await TaskComment.findById(comment._id)

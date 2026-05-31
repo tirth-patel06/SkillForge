@@ -45,13 +45,23 @@ router.get("/", requireAuth, requireAdmin, async (req, res) => {
 
     // Generate PDF and set public URL (createReferralPdf returns a public path)
     const mentorEmail = (ref as any).mentorId?.email || "";
+    const mentorName = (ref as any).mentorId?.name || "";
     const studentEmail = (ref as any).studentId?.email || "";
+    const studentName = (ref as any).studentId?.name || "";
+    const issuedBy = req.user?.name || req.user?.email || "Admin";
     const pdfUrl = await createReferralPdf({
       mentorEmail,
+      mentorName,
       studentEmail,
+      studentName,
       reason: ref.recommendation || "",
       evidence: ref.evidenceLinks || [],
       token,
+      referralId: ref._id.toString(),
+      status: ref.status,
+      issuedAt: new Date(),
+      issuedBy,
+      evidenceCount: ref.evidenceLinks?.length || 0,
     });
     ref.pdfUrl = pdfUrl;
 

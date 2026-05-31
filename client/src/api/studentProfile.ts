@@ -7,6 +7,7 @@ export type PublicStudentProfile = {
   name: string;
   email: string;
   role: "STUDENT" | "MENTOR" | "ADMIN";
+  score?: number;
   profile: StudentProfile | null;
   visibility?: string;
 };

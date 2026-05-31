@@ -50,7 +50,7 @@ export function StudentProfileModal({
           <div className="p-8">
             {/* Profile Photo and Basic Info */}
             <div className="flex items-start gap-6 mb-8">
-              <div className="w-24 h-24 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 border-2 border-zinc-800 flex items-center justify-center text-white text-2xl font-bold overflow-hidden flex-shrink-0 shadow-lg">
+              <div className="relative w-24 h-24 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 border-2 border-zinc-800 flex items-center justify-center text-white text-2xl font-bold overflow-hidden flex-shrink-0 shadow-lg">
                 {profile?.profilePhotoUrl ? (
                   <img
                     src={profile.profilePhotoUrl}
@@ -59,6 +59,11 @@ export function StudentProfileModal({
                   />
                 ) : (
                   student.name?.charAt(0).toUpperCase() || "S"
+                )}
+                {typeof student.score === "number" && (
+                  <span className="absolute -bottom-1 -right-1 min-w-7 h-7 px-2 bg-blue-950 text-blue-200 text-xs font-semibold rounded-full border border-blue-500/40 flex items-center justify-center shadow">
+                    {student.score}
+                  </span>
                 )}
               </div>
               <div className="flex-1">
@@ -69,8 +74,13 @@ export function StudentProfileModal({
                   <Mail className="w-4 h-4" />
                   <p className="text-sm">{student.email}</p>
                 </div>
-                <span className="inline-block px-3 py-1 bg-blue-600/20 text-blue-300 text-xs font-semibold rounded-full border border-blue-500/30">
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-600/20 text-blue-300 text-xs font-semibold rounded-full border border-blue-500/30">
                   {student.role}
+                  {typeof student.score === "number" && (
+                    <span className="px-2 py-0.5 bg-blue-950/60 text-blue-200 rounded-full text-[11px] border border-blue-500/30">
+                      {student.score}
+                    </span>
+                  )}
                 </span>
               </div>
             </div>

@@ -24,6 +24,7 @@ export const getMyReferrals = async (req: AuthRequest, res: Response) => {
     // Map to frontend format
     const formattedReferrals = referrals.map(r => ({
       id: r._id.toString(),
+      student_id: (r as any).studentId?._id?.toString() || "",
       student_name: (r as any).studentId?.name || "Unknown",
       mentor_name: (r as any).mentorId?.name || "Unknown",
       recommendation: r.recommendation || "",

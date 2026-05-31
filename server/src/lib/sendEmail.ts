@@ -101,7 +101,7 @@ async function sendViaBrevo(to: string, otp: string, name?: string, role?: strin
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.BREVO_SENDER_EMAIL;
   const senderName =
-    process.env.BREVO_SENDER_NAME || process.env.APP_NAME || "Mentor Hub";
+    process.env.BREVO_SENDER_NAME || process.env.APP_NAME || "SkillForge";
 
   if (!apiKey || !senderEmail) {
     return { ok: false, reason: "BREVO not configured" } as const;

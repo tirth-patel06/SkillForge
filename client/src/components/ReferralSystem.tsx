@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import type React from "react";
 import { api } from "@/lib/api";
+import { getStudentProfile } from "@/api/studentProfile";
+import type { PublicStudentProfile } from "@/api/studentProfile";
+import { StudentProfileModal } from "@/components/StudentProfileModal";
 import { Plus, X, Send, FileText, Link as LinkIcon, User, Download } from "lucide-react";
 
 type Student = {
@@ -17,6 +20,7 @@ type ReferralForm = {
 
 type SavedReferral = {
   id: string;
+  student_id: string;
   student_name: string;
   recommendation: string;
   evidence_links: string[];
@@ -37,6 +41,9 @@ export function ReferralSystem() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [studentProfile, setStudentProfile] = useState<PublicStudentProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -99,6 +106,21 @@ export function ReferralSystem() {
       setMessage(`Error: ${error.response?.data?.message || error.message}`);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleOpenProfile = async (studentId: string) => {
+    if (!studentId) return;
+
+    setLoadingProfile(true);
+    try {
+      const profile = await getStudentProfile(studentId);
+      setStudentProfile(profile);
+      setShowProfileModal(true);
+    } catch (error) {
+      console.error("Error loading student profile:", error);
+    } finally {
+      setLoadingProfile(false);
     }
   };
 
@@ -303,6 +325,15 @@ export function ReferralSystem() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenProfile(referral.student_id)}
+                        disabled={loadingProfile}
+                        className="px-3 py-2 rounded-lg bg-zinc-800/80 text-zinc-200 hover:bg-zinc-700 transition-colors text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="View student profile"
+                      >
+                        View Profile
+                      </button>
                       {referral.pdf_url && (
                         <a
                           href={referral.pdf_url}
@@ -341,6 +372,15 @@ export function ReferralSystem() {
           )}
         </div>
       </div>
+
+      <StudentProfileModal
+        student={studentProfile}
+        isOpen={showProfileModal}
+        onClose={() => {
+          setShowProfileModal(false);
+          setStudentProfile(null);
+        }}
+      />
     </div>
   );
 }
