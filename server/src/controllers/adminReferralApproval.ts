@@ -22,17 +22,18 @@ router.get("/", requireAuth, requireAdmin, async (req, res) => {
     console.error("GET /referrals error:", err);
     res.status(500).json({ error: "server error" });
   }
-  router.patch("/:id/approve", requireAuth, requireAdmin, async (req, res) => {
+});
+
+router.patch("/:id/approve", requireAuth, requireAdmin, async (req, res) => {
   try {
-    const adminId = req.user?.id; 
+    const adminId = req.user?.id;
     const { note } = req.body;
 
     const ref = await Referral.findById(req.params.id).populate("mentorId studentId");
     if (!ref) return res.status(404).json({ error: "not found" });
 
-
     ref.status = "APPROVED";
-   
+
     // Sign token
     const payload = {
       referralId: ref._id.toString(),
@@ -67,32 +68,30 @@ router.get("/", requireAuth, requireAdmin, async (req, res) => {
 
     await ref.save();
 
-
     // Notifications to mentor and student (if populated references exist)
-   // if ((ref as any).mentorId) {
-   //   await Notification.create({
-     //   userId: (ref as any).mentorId._id || (ref as any).mentorId,
-     //   message: `Referral ${ref._id} approved. A referral packet has been generated.`,
-      ///  type: "success",
-//data: { referralId: ref._id.toString(), pdfUrl },
-   //   });
-  //  }
+    // if ((ref as any).mentorId) {
+    //   await Notification.create({
+    //     userId: (ref as any).mentorId._id || (ref as any).mentorId,
+    //     message: `Referral ${ref._id} approved. A referral packet has been generated.`,
+    //     type: "success",
+    //     data: { referralId: ref._id.toString(), pdfUrl },
+    //   });
+    // }
 
-  //  if ((ref as any).studentId) {
-   //   await Notification.create({
-   //     userId: (ref as any).studentId._id || (ref as any).studentId,
-    //    message: `You received a referral from your mentor.`,
-    //    type: "success",
-   //     data: { referralId: ref._id.toString(), pdfUrl },
-   //   });
-  //  }
+    // if ((ref as any).studentId) {
+    //   await Notification.create({
+    //     userId: (ref as any).studentId._id || (ref as any).studentId,
+    //     message: `You received a referral from your mentor.`,
+    //     type: "success",
+    //     data: { referralId: ref._id.toString(), pdfUrl },
+    //   });
+    // }
 
     res.json({ ok: true, ref });
   } catch (err) {
     console.error("PATCH /referrals/:id/approve error:", err);
     res.status(500).json({ error: "server error" });
   }
-});
 });
 
 
