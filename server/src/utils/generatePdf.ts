@@ -1,6 +1,7 @@
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
+import { PassThrough } from "stream";
 import cloudinary from "../config/cloudinary";
 export async function createReferralPdf(referralData: {
   mentorEmail: string;
@@ -26,19 +27,36 @@ export async function createReferralPdf(referralData: {
     ? referralData.evidenceCount
     : referralData.evidence?.length || 0;
 
-  if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir);
-  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
-
-  const filename = `referral_${Date.now()}.pdf`;
-  const filePath = path.join(outDir, filename);
   return new Promise<string>((resolve, reject) => {
     const doc = new PDFDocument({
       size: "A4",
       margins: { top: 48, bottom: 48, left: 50, right: 50 },
     });
 
-    const stream = fs.createWriteStream(filePath);
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "referrals",
+        resource_type: "raw",
+        public_id: `referral_${Date.now()}`,
+      },
+      (err, result) => {
+        if (err) {
+          console.error("Cloudinary upload failed:", err);
+          resolve("");
+          return;
+        }
+
+        const cloudUrl = result?.secure_url || result?.url || "";
+        resolve(cloudUrl);
+      }
+    );
+
+    const stream = new PassThrough();
+    stream.on("error", reject);
+    uploadStream.on("error", reject);
+    doc.on("error", reject);
     doc.pipe(stream);
+    stream.pipe(uploadStream);
 
     const pageWidth = doc.page.width;
     const pageHeight = doc.page.height;
@@ -297,36 +315,5 @@ export async function createReferralPdf(referralData: {
     });
 
     doc.end();
-    stream.on("finish", async () => {
-      let cloudUrl: string | null = null;
-      try {
-        const result = await cloudinary.uploader.upload(filePath, {
-          folder: "referrals",
-          resource_type: "image", // important for PDF
-          public_id: `referral_${Date.now()}`,
-        });
-
-        cloudUrl = cloudinary.url(result.public_id, {
-          resource_type: "image",
-          secure: true,
-        });
-      } catch (err) {
-        console.error("Cloudinary upload failed:", err);
-
-        cloudUrl = "";
-      }
-
-      try {
-        fs.unlinkSync(filePath);
-      } catch (e) {
-        console.error("Failed to delete local PDF:", e);
-      }
-
-      resolve(cloudUrl);
-    });
-
-    stream.on("error", (err) => {
-      reject(err);
-    });
   });
 }
