@@ -18,7 +18,6 @@ export async function createReferralPdf(referralData: {
   evidenceCount?: number;
 }): Promise<string> {
   const publicDir = path.join(__dirname, "../../public");
-  const outDir = path.join(publicDir, "referrals");
   const appName = process.env.APP_NAME || "SkillForge";
   const appUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || "";
   const issuedAt = referralData.issuedAt ? new Date(referralData.issuedAt) : new Date();
@@ -26,6 +25,8 @@ export async function createReferralPdf(referralData: {
   const evidenceCount = typeof referralData.evidenceCount === "number"
     ? referralData.evidenceCount
     : referralData.evidence?.length || 0;
+  const lightMode = process.env.PDF_LIGHT_MODE === "true" || true;
+  const maxLogoBytes = Number(process.env.PDF_MAX_LOGO_BYTES || 200000);
 
   return new Promise<string>((resolve, reject) => {
     const doc = new PDFDocument({
@@ -104,8 +105,15 @@ export async function createReferralPdf(referralData: {
       const logoPath = candidates.find((p) => fs.existsSync(p));
 
       if (logoPath) {
-        doc.image(logoPath, x, y, { fit: [size, size], align: "center" });
-        return;
+        try {
+          const stats = fs.statSync(logoPath);
+          if (stats.size <= maxLogoBytes) {
+            doc.image(logoPath, x, y, { fit: [size, size], align: "center" });
+            return;
+          }
+        } catch (err) {
+          console.error("Logo stat failed:", err);
+        }
       }
 
       const centerX = x + size / 2;
@@ -141,18 +149,20 @@ export async function createReferralPdf(referralData: {
     doc.rect(0, 0, pageWidth, pageHeight).fill(soft);
     doc.restore();
 
-    doc.save();
-    doc.opacity(0.08).strokeColor(gold).lineWidth(1);
-    for (let x = -pageHeight; x < pageWidth + pageHeight; x += 28) {
-      doc.moveTo(x, 0).lineTo(x + pageHeight, pageHeight).stroke();
-    }
-    doc.restore();
+    if (!lightMode) {
+      doc.save();
+      doc.opacity(0.08).strokeColor(gold).lineWidth(1);
+      for (let x = -pageHeight; x < pageWidth + pageHeight; x += 28) {
+        doc.moveTo(x, 0).lineTo(x + pageHeight, pageHeight).stroke();
+      }
+      doc.restore();
 
-    doc.save();
-    doc.opacity(0.05);
-    doc.font("Times-Bold").fontSize(72).fillColor(deep);
-    doc.text(appName, 0, pageHeight / 2 - 60, { align: "center" });
-    doc.restore();
+      doc.save();
+      doc.opacity(0.05);
+      doc.font("Times-Bold").fontSize(72).fillColor(deep);
+      doc.text(appName, 0, pageHeight / 2 - 60, { align: "center" });
+      doc.restore();
+    }
 
     const borderInset = 24;
     doc.lineWidth(2).strokeColor(gold);
