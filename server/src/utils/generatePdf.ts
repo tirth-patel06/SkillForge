@@ -34,11 +34,13 @@ export async function createReferralPdf(referralData: {
       margins: { top: 48, bottom: 48, left: 50, right: 50 },
     });
 
+    const publicId = `referral_${Date.now()}`;
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: "referrals",
         resource_type: "raw",
-        public_id: `referral_${Date.now()}`,
+        public_id: publicId,
+        format: "pdf",
       },
       (err, result) => {
         if (err) {
@@ -47,7 +49,14 @@ export async function createReferralPdf(referralData: {
           return;
         }
 
-        const cloudUrl = result?.secure_url || result?.url || "";
+        const cloudUrl =
+          result?.secure_url ||
+          result?.url ||
+          cloudinary.url(publicId, {
+            resource_type: "raw",
+            secure: true,
+            format: "pdf",
+          });
         resolve(cloudUrl);
       }
     );
