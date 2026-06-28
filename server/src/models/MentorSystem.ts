@@ -5,27 +5,6 @@ import mongoose, {
   Types,
 } from "mongoose";
 
-/*Team*/
-
-export interface ITeam extends Document {
-  name: string;
-  // users (students) in this team
-  members: Types.ObjectId[]; // "User"
-  leader: Types.ObjectId; // "User"
-  mentor: Types.ObjectId; // "User" with role "MENTOR"
-  createdAt: Date;
-}
-
-const TeamSchema = new Schema<ITeam>({
-  name: { type: String, required: true },
-  members: [{ type: Schema.Types.ObjectId, ref: "User" }],
-  leader: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  mentor: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  createdAt: { type: Date, default: Date.now },
-});
-
-TeamSchema.index({ mentor: 1 });
-
 /*Rubric Criteria*/
 
 export interface IRubricCriteria extends Document {
@@ -76,14 +55,13 @@ const ReviewSchema = new Schema<IReview>(
 export interface ISubmission extends Document {
   taskId: Types.ObjectId; // ref: "Task"
   studentId?: Types.ObjectId; // ref: "User"
-  teamId?: Types.ObjectId; // ref: "Team"
   version: number;
   githubUrl?: string;
   fileUrls: string[];
   files: string[];
   notes?: string;
   status: SubmissionStatus;
-  submittedAt: Date;
+  submittedAt: Date | null;
   reviewedBy?: Types.ObjectId; // ref: "User" (mentor)
   reviewedAt?: Date;
   review?: IReview;
@@ -99,10 +77,6 @@ const SubmissionSchema = new Schema<ISubmission>({
     type: Schema.Types.ObjectId,
     ref: "User",
   },
-  teamId: {
-    type: Schema.Types.ObjectId,
-    ref: "Team",
-  },
   version: { type: Number, default: 1 },
   githubUrl: { type: String },
   fileUrls: { type: [String], default: [] },
@@ -113,7 +87,7 @@ const SubmissionSchema = new Schema<ISubmission>({
     enum: ["PENDING", "APPROVED", "CHANGES_REQUESTED"],
     default: "PENDING",
   },
-  submittedAt: { type: Date, default: Date.now },
+  submittedAt: { type: Date, default: null },
   reviewedBy: {
     type: Schema.Types.ObjectId,
     ref: "User",
@@ -127,7 +101,6 @@ const SubmissionSchema = new Schema<ISubmission>({
 
 SubmissionSchema.index({ taskId: 1 });
 SubmissionSchema.index({ studentId: 1 });
-SubmissionSchema.index({ teamId: 1 });
 SubmissionSchema.index({ status: 1 });
 
 /*Submission Score (per-criteria breakdown)*/
@@ -161,8 +134,6 @@ SubmissionScoreSchema.index({ criteriaId: 1 });
 
 /*Model exports*/
 
-// Team model is exported from Team.ts instead to avoid conflicts
-// export const Team: Model<ITeam> = mongoose.model<ITeam>("Team", TeamSchema);
 export const RubricCriteria: Model<IRubricCriteria> = mongoose.model<IRubricCriteria>(
   "RubricCriteria",
   RubricCriteriaSchema

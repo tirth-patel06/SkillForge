@@ -2,8 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "../types/auth";
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
-
 export function requireAuth(
   req: Request,
   res: Response,
@@ -16,24 +14,23 @@ export function requireAuth(
 
   const token = req.cookies?.token || bearer;
 
-  console.log("🔐 Auth Check:");
-  console.log("  Authorization header:", authHeader ? "✓ present" : "✗ missing");
-  console.log("  Bearer token:", bearer ? "✓ present" : "✗ missing");
-  console.log("  Cookie token:", req.cookies?.token ? "✓ present" : "✗ missing");
-  console.log("  Final token used:", token ? "✓ present" : "✗ missing");
-
   if (!token) {
     res.status(401).json({ message: "Not authenticated" });
     return;
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error("JWT_SECRET is not set");
+      res.status(500).json({ message: "Server misconfigured" });
+      return;
+    }
+
+    const decoded = jwt.verify(token, secret) as JwtPayload;
     req.user = decoded;
-    console.log("  ✓ Token verified:", decoded.email);
     next();
   } catch (error: any) {
-    console.log("  ✗ Token verification failed:", error.message);
     res.status(401).json({ message: "Invalid or expired token" });
   }
 }

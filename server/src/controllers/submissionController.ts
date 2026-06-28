@@ -5,8 +5,6 @@ import { Task } from "../models/Task";
 import { User } from "../models/User";
 import mongoose from "mongoose";
 import Contribution from "../models/Contribution";
-import { emitContributionUpdate } from "../socket";
-import { getIO } from "../socket";
 // GET /submissions - Get all submissions for current user
 export const getSubmissions = async (req: AuthRequest, res: Response) => {
   try {
@@ -45,7 +43,6 @@ export const getSubmissions = async (req: AuthRequest, res: Response) => {
       .populate("taskId", "title description difficulty")
       .populate("studentId", "name email")
       .populate("reviewedBy", "name email")
-      .populate("teamId", "name")
       .select("-__v")
       .lean();
 
@@ -164,25 +161,16 @@ export const submitReview = async (req: AuthRequest, res: Response) => {
       points: totalScore,
     });
 
-    // realtime notify student
-    getIO()
-      .to(submission.studentId.toString())
-      .emit("contribution:update");
   }
     
-  // Fetch the task to get points
-    const taskData = await Task.findById(submission.taskId);
-    
+  // Award points ONLY if submission is APPROVED
+  if (status === "APPROVED") {
     await Contribution.create({
-    user: submission.studentId,
-    type: "TASK",
-    description: `Completed task`,
-    points: 10,
-  });
-  console.log("🔥 Emitting contribution update");
-  // realtime notify
-  if (submission.studentId) {
-    getIO().to(submission.studentId.toString()).emit("contribution:update");
+      user: submission.studentId,
+      type: "TASK",
+      description: `Completed task`,
+      points: 10,
+    });
   }
     // Log contribution for student
 //     if (!task) {

@@ -18,16 +18,10 @@ export default function ContributionDashboard() {
   } = useContributions();
 
   useEffect(() => {
-    const refresh = () => {
-      loadScore();
-      loadHeatmap();
-      loadHistory();
-      loadBadges();
-    };
-
-    window.addEventListener("contribution-refresh", refresh);
-    return () =>
-      window.removeEventListener("contribution-refresh", refresh);
+    loadScore();
+    loadHeatmap();
+    loadHistory();
+    loadBadges();
   }, [loadScore, loadHeatmap, loadHistory, loadBadges]);
 
   return (
@@ -50,7 +44,7 @@ export default function ContributionDashboard() {
 
             {/* ✅ AFTER */}
             <div
-              className="h-full rounded-full bg-linear-to-r from-emerald-400 to-sky-400"
+              className="h-full rounded-full bg-linear-to-r from-emerald-400 via-green-400 to-teal-400"
               style={{ width: `${Math.min(score ?? 0, 100)}%` }}
             />
           </div>

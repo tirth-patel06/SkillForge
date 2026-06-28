@@ -67,7 +67,6 @@ router.get("/active", async (req: AuthRequest, res) => {
       description: t.description,
       difficulty: t.difficulty,      // "EASY" | "MEDIUM" | "HARD"
       techStack: t.techStack || [],
-      expectedTeamSize: t.expectedTeamSize,
       deadline: t.deadline ? t.deadline.toISOString() : null,
       status: t.status,              // still TaskStatus
       createdAt: t.createdAt?.toISOString() || new Date().toISOString(),
@@ -113,16 +112,16 @@ router.post("/:taskId/enroll", async (req: AuthRequest, res) => {
         .json({ message: "You already have a submission/enrollment for this task" });
     }
 
-    // Create submission acting as "enrollment"
+    // Create a placeholder so the student can submit later
     const submission = await Submission.create({
       taskId: task._id,
       studentId: user.id,
       status: "PENDING",       // waiting for mentor review (once content is added)
-      githubUrl: undefined,    // will be filled later
+      githubUrl: "",           // will be filled later
       fileUrls: [],
       files: [],
-      notes: undefined,        // will store description later
-      submittedAt: undefined,  // will be set only when student actually submits
+      notes: "",               // will store description later
+      submittedAt: null,       // set only when student actually submits
     });
 
     return res.status(201).json({
@@ -159,7 +158,6 @@ router.get("/enrolled", async (req: AuthRequest, res) => {
           description: t.description,
           difficulty: t.difficulty,
           techStack: t.techStack || [],
-          expectedTeamSize: t.expectedTeamSize,
           deadline: t.deadline ? t.deadline.toISOString() : null,
           taskStatus: t.status,           // TaskStatus
           submissionStatus: s.status,     // "PENDING" | "APPROVED" | "CHANGES_REQUESTED"

@@ -15,21 +15,21 @@ const router = Router({ mergeParams: true });
 router.use(requireAuth);
 
 // Get all comments for a task
-router.get("/tasks/:taskId/comments", getTaskComments);
+router.get("/tasks/:taskId", getTaskComments);
 
 // Create a new comment on a task
-router.post("/tasks/:taskId/comments", createComment);
+router.post("/tasks/:taskId", createComment);
 
 // Update a comment
-router.put("/comments/:commentId", updateComment);
+router.put("/:commentId", updateComment);
 
 // Delete a comment
-router.delete("/comments/:commentId", deleteComment);
+router.delete("/:commentId", deleteComment);
 
 // Like/unlike a comment
-router.post("/comments/:commentId/like", toggleCommentLike);
+router.post("/:commentId/like", toggleCommentLike);
 
 // Get comment thread (parent + replies)
-router.get("/comments/:commentId/thread", getCommentThread);
+router.get("/:commentId/thread", getCommentThread);
 
 export default router;

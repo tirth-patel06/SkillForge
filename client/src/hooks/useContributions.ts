@@ -40,8 +40,8 @@
 //   };
 // };
 
-import { useState } from "react";
-import { getBadges, getHistory, getScore } from "@/api/contributions";
+import { useCallback, useState } from "react";
+import { getBadges, getHistory, getScore, getStats } from "@/api/contributions";
 
 export const useContributions = () => {
   const [score, setScore] = useState<number>(0);
@@ -51,32 +51,28 @@ export const useContributions = () => {
   const [history, setHistory] = useState<any[]>([]);
   const [badges, setBadges] = useState<any[]>([]);
 
-  const loadScore = async () => {
-    const res = await getScore();
+  const loadScore = useCallback(async () => {
+    const [scoreRes, statsRes] = await Promise.all([getScore(), getStats()]);
 
-    console.log("⭐ SCORE FROM BACKEND:", res.data);
+    setScore(scoreRes.data.score ?? 0);
+    setWeeklyCount(statsRes.data.weeklyCount ?? 0);
+    setStreak(statsRes.data.streak ?? 0);
+  }, []);
 
-    setScore(res.data.score);
-    setWeeklyCount(res.data.weeklyCount);
-    setStreak(res.data.streak);
-  };
-
-  const loadHeatmap = async () => {
+  const loadHeatmap = useCallback(async () => {
     // Heatmap component likely fetches its own data
     // Leaving intentionally empty is OK
-  };
+  }, []);
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     const res = await getHistory();
-    console.log("📜 HISTORY FROM BACKEND:", res);
-    setHistory(res);
-  };
+    setHistory(res || []);
+  }, []);
 
-  const loadBadges = async () => {
+  const loadBadges = useCallback(async () => {
     const res = await getBadges();
-    console.log("🏆 BADGES FROM BACKEND:", res);
-    setBadges(res);
-  };
+    setBadges(res || []);
+  }, []);
 
   // ✅ NOW MATCHES DASHBOARD EXPECTATIONS
   return {

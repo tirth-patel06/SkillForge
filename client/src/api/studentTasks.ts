@@ -10,7 +10,6 @@ export type ActiveTaskItem = {
   description?: string;
   difficulty: "EASY" | "MEDIUM" | "HARD";
   techStack: string[];
-  expectedTeamSize?: number;
   deadline: string | null;
   status: TaskStatus;
   createdAt: string;
@@ -25,7 +24,6 @@ export type EnrolledTaskItem = {
   description?: string;
   difficulty: "EASY" | "MEDIUM" | "HARD";
   techStack: string[];
-  expectedTeamSize?: number;
   deadline: string | null;
   taskStatus: TaskStatus;          // from Task model
   submissionStatus: SubmissionStatus; // from Submission model

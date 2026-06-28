@@ -132,7 +132,7 @@ export const getTaskDetail = async (req: AuthRequest, res: Response) => {
 
     // Get submissions for this task
     const submissions = await Submission.find({ taskId })
-      .select("_id studentId teamId status submittedAt")
+      .select("_id studentId status submittedAt")
       .lean();
 
     // Get unique enrolled students (from submissions and StudentEnrollment if exists)

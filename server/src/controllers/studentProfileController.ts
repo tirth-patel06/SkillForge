@@ -2,6 +2,7 @@ import type { Response } from "express";
 import type { AuthRequest } from "../types/auth";
 import { StudentProfile } from "../models/StudentProfile";
 import { User } from "../models/User";
+import Contribution from "../models/Contribution";
 import mongoose from "mongoose";
 
 /**
@@ -152,6 +153,13 @@ export const getPublicProfile = async (req: AuthRequest, res: Response) => {
       if (user.role !== "STUDENT") {
         return res.status(400).json({ message: "Not a student account" });
       }
+
+      const scoreResult = await Contribution.aggregate([
+        { $match: { user: user._id } },
+        { $group: { _id: null, total: { $sum: "$points" } } },
+      ]);
+
+      const score = scoreResult[0]?.total ?? 0;
   
       // Get the profile
       const profile = await StudentProfile.findOne({ userId: user._id }).lean();
@@ -163,6 +171,7 @@ export const getPublicProfile = async (req: AuthRequest, res: Response) => {
           name: user.name,
           email: user.email,
           role: user.role,
+          score,
           profile: null,
           visibility: "PUBLIC", // default assumption
         });
@@ -183,6 +192,7 @@ export const getPublicProfile = async (req: AuthRequest, res: Response) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        score,
         profile: {
           bio: profile.bio,
           profilePhotoUrl: profile.profilePhotoUrl,

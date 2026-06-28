@@ -103,9 +103,6 @@ const AuthPage: React.FC = () => {
     }
   };
 
-  const githubUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/github`;
-
-
   return (
     <div style={{ maxWidth: 420, margin: "40px auto" }}>
       <h1 style={{ textAlign: "center" }}>Login / Signup</h1>
@@ -205,14 +202,6 @@ const AuthPage: React.FC = () => {
           </div>
         </form>
       )}
-
-      {/* GitHub login */}
-      <div style={{ marginTop: 24, textAlign: "center" }}>
-        <p>OR</p>
-        <a href={githubUrl}>
-          <button type="button">Continue with GitHub</button>
-        </a>
-      </div>
 
       {info && <p style={{ color: "green" }}>{info}</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}

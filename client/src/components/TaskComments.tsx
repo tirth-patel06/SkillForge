@@ -42,7 +42,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
   const fetchComments = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await api.get(`/tasks/${taskId}/comments`);
+      const res = await api.get(`/comments/tasks/${taskId}`);
       if (res.data.success) {
         setComments(res.data.comments);
       }
@@ -65,7 +65,7 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
     try {
       setSubmitting(true);
       setError(null);
-      const res = await api.post(`/tasks/${taskId}/comments`, {
+      const res = await api.post(`/comments/tasks/${taskId}`, {
         content: newComment,
       });
       if (res.data.success) {
@@ -83,13 +83,13 @@ export function TaskComments({ taskId, taskTitle }: TaskCommentsProps) {
   const handleReply = useCallback(async (parentId: string) => {
     const textarea = replyTextareaRefs.current[parentId];
     const replyContent = textarea?.value || "";
-    
+
     if (!replyContent?.trim()) return;
 
     try {
       setSubmitting(true);
       setError(null);
-      const res = await api.post(`/tasks/${taskId}/comments`, {
+      const res = await api.post(`/comments/tasks/${taskId}`, {
         content: replyContent,
         parentCommentId: parentId,
       });

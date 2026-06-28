@@ -21,8 +21,8 @@ export default function ContributionBadges() {
             key={b.name}
             className={`rounded-xl px-3 py-2 border ${
               b.achieved
-                ? "border-emerald-400 text-emerald-300"
-                : "border-slate-700 text-slate-500"
+                ? "border-zinc-500 text-zinc-200"
+                : "border-zinc-700 text-zinc-500"
             }`}
           >
             {b.icon} {b.name}

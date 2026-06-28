@@ -8,8 +8,7 @@ import type {
   SocialLinks,
   ProfileVisibility,
 } from "@/types/studentProfile";
-
-const API_BASE_URL = "http://localhost:8000"; // or from env later
+import { api } from "@/lib/api";
 
 const emptyProfile: StudentProfile = {
   bio: "",
@@ -60,19 +59,9 @@ const StudentProfilePage: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const res = await fetch(`${API_BASE_URL}/api/students/me/profile`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // send cookies (JWT)
-        });
-
-        if (!res.ok) {
-          throw new Error(`Failed to load profile (${res.status})`);
-        }
-
-        const data: MeProfileResponse = await res.json();
+        const { data } = await api.get<MeProfileResponse>(
+          "/students/me/profile"
+        );
 
         setName(data.name || "");
         setEmail(data.email);
@@ -237,20 +226,7 @@ const StudentProfilePage: React.FC = () => {
       setSaving(true);
       setError(null);
 
-      const res = await fetch(`${API_BASE_URL}/api/students/me/profile`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(profile),
-      });
-
-      if (!res.ok) {
-        throw new Error(`Failed to save profile (${res.status})`);
-      }
-
-      const data = await res.json();
+      const { data } = await api.put("/students/me/profile", profile);
       if (data.profile) {
         setProfile((prev) => ({
           ...prev,
@@ -278,14 +254,14 @@ const StudentProfilePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#020617] text-slate-200">
+      <div className="min-h-screen flex items-center justify-center bg-black text-zinc-200">
         Loading profile...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#02040a] text-slate-100">
+    <div className="min-h-screen bg-black text-zinc-100">
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
         <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -382,7 +358,7 @@ const StudentProfilePage: React.FC = () => {
                   type="button"
                   onClick={handleAddSkill}
                   disabled={!isEditing}
-                  className={`rounded-full px-3 py-2 text-xs font-medium text-slate-50 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 ${
+                  className={`rounded-full px-3 py-2 text-xs font-medium text-zinc-100 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 ${
                     isEditing ? "" : "opacity-50 cursor-not-allowed"
                   }`}
                 >
@@ -400,7 +376,7 @@ const StudentProfilePage: React.FC = () => {
                 {profile.skills.map((skill) => (
                   <span
                     key={skill}
-                    className="inline-flex items-center gap-1 rounded-full border border-zinc-600 bg-linear-to-br from-sky-500/10 to-slate-950 px-2 py-1 text-[11px]"
+                    className="inline-flex items-center gap-1 rounded-full border border-zinc-700 bg-zinc-900/60 px-2 py-1 text-[11px] text-zinc-200"
                   >
                     {skill}
                     {isEditing && (
@@ -626,7 +602,7 @@ const StudentProfilePage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="rounded-full bg-linear-to-r from-emerald-500 via-green-500 to-sky-500 px-5 py-2 text-xs font-semibold text-slate-900 disabled:cursor-wait disabled:opacity-80"
+                    className="rounded-full bg-zinc-600 hover:bg-zinc-500 px-5 py-2 text-xs font-semibold text-white disabled:cursor-wait disabled:opacity-80"
                   >
                     {saving ? "Saving..." : "Save Changes"}
                   </button>
@@ -640,10 +616,10 @@ const StudentProfilePage: React.FC = () => {
           </form>
 
           {/* Right: Profile preview & visibility */}
-          <aside className="flex flex-col gap-4 rounded-2xl border border-emerald-500/20 bg-linear-to-b from-teal-900/30 via-slate-950 to-black px-4 py-4">
+          <aside className="flex flex-col gap-4 rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-4">
             {/* Avatar + basic info */}
             <div className="flex items-center gap-3">
-              <div className="h-16 w-16 rounded-full border-2 border-emerald-300/70 bg-linear-to-b from-emerald-400 to-slate-900 flex items-center justify-center text-lg font-semibold text-emerald-950 overflow-hidden">
+              <div className="h-16 w-16 rounded-full border-2 border-zinc-600 bg-zinc-900 flex items-center justify-center text-lg font-semibold text-zinc-100 overflow-hidden">
                 {profile.profilePhotoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -666,7 +642,7 @@ const StudentProfilePage: React.FC = () => {
                 <p
                   className={`mt-1 text-[11px] ${
                     profile.visibility === "PUBLIC"
-                      ? "text-emerald-400"
+                      ? "text-zinc-200"
                       : "text-red-400"
                   }`}
                 >
